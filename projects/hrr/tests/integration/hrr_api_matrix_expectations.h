@@ -17,7 +17,7 @@
  * what keeps the Catch2 tests and the matrix reporter from drifting into
  * disagreeing about what an API is supposed to do at replay.
  *
- * Generated from 559 HIP APIs.
+ * Generated from 562 HIP APIs.
  */
 
 #pragma once
@@ -238,6 +238,7 @@ inline constexpr HrrApiExpectation kHrrApiMatrix[] = {
     {"hipDeviceGetCacheConfig", "T4", 0, false, true, false, false},
     {"hipDeviceGetDefaultMemPool", "T4", 0, false, true, false, false},
     {"hipDeviceGetDevResource", "T4", 0, false, true, false, false},
+    {"hipDeviceGetExecAffinitySupport", "T4", 0, false, true, false, false},
     {"hipDeviceGetExecutionCtx", "T4", 0, false, true, false, false},
     {"hipDeviceGetGraphMemAttribute", "T4", 1, false, true, false, false},
     {"hipDeviceGetLimit", "T4", 0, false, true, false, false},
@@ -445,6 +446,7 @@ inline constexpr HrrApiExpectation kHrrApiMatrix[] = {
     {"hipMemcpy3DAsync", "T4", 0, false, true, false, false},
     {"hipMemcpy3DAsync_spt", "T4", 0, false, true, false, false},
     {"hipMemcpy3DBatchAsync", "T4", 0, false, true, false, false},
+    {"hipMemcpy3DWithAttributesAsync", "T4", 0, false, true, false, false},
     {"hipMemcpy3D_spt", "T4", 0, false, true, false, false},
     {"hipMemcpyAsync_spt", "T4", 1, false, true, false, false},
     {"hipMemcpyAtoA", "T4", 1, false, true, false, false},
@@ -462,6 +464,7 @@ inline constexpr HrrApiExpectation kHrrApiMatrix[] = {
     {"hipMemcpyParam2DAsync", "T4", 0, false, true, false, false},
     {"hipMemcpyToSymbolAsync_spt", "T4", 1, false, true, false, false},
     {"hipMemcpyToSymbol_spt", "T4", 1, false, true, false, false},
+    {"hipMemcpyWithAttributesAsync", "T4", 0, false, true, false, false},
     {"hipMemcpy_spt", "T4", 1, false, true, false, false},
     {"hipMemset2D", "T4", 0, false, true, false, false},
     {"hipMemset2DAsync", "T4", 0, false, true, false, false},
