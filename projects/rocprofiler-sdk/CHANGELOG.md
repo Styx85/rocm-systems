@@ -11,6 +11,11 @@ Full documentation for ROCprofiler-SDK is available at [rocm.docs.amd.com/projec
 
 ### Changed
 
+- ROCprofiler-SDK now keeps profiling active in the parent after `fork()` and disables the
+  inherited session in the child. The child must proceed to `exec()` or `_exit()`; a successful
+  `exec()` starts a fresh profiling session, while continuing normal execution in the plain-fork
+  child is unsupported.
+
 ### Resolved issues
 
 - Fixed rocpd reporting a counter at N times its value under `rocprofv3 --replay-mode kernel` when N `--pmc` groups list it, for example a sanity counter such as `SQ_WAVES` in every group. Every pass of a replayed dispatch shares the dispatch's record, so the `counters_collection` view, and the counter CSV and Perfetto output that `rocpd convert` builds from it, summed the passes. Passes after the first are now tagged with `replay_pass` in `rocpd_pmc_event.extdata`, the view averages a counter over the passes that collected it, and the `pmc_events` view reports each row's pass in a new `replay_pass` column. This behavior is identified by rocpd schema version 3.0.6.
