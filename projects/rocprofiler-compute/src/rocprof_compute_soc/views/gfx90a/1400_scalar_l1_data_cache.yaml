@@ -2,7 +2,6 @@ view: Scalar L1 Data Cache
 alias: sl1d
 tables:
 - title: Scalar L1D Speed-of-Light
-  cli_style: simple_bar
   header:
     metric: Metric
     value: Avg

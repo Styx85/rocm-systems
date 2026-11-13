@@ -48,14 +48,6 @@ from utils.utils_common import (
 METRIC_TABLE = "metric_table"
 RAW_CSV_TABLE = "raw_csv_table"
 RENDERS = (METRIC_TABLE, RAW_CSV_TABLE, "pc_sampling_table")
-# How the CLI draws a metric table (tty.py, memory_chart).
-CLI_STYLES = (
-    "simple_box",
-    "simple_bar",
-    "simple_multiple_bar",
-    "mem_chart",
-    "Roofline",
-)
 # A row shows its formula in the first of these columns its table has.
 MAIN_COLUMNS = ("avg", "value", "expr")
 # Columns that aggregate the main formula over kernels, with the function they apply.
@@ -68,7 +60,6 @@ TABLE_FIELDS = (
     "render",
     "title",
     "header",
-    "cli_style",
     "placeholder_range",
     "metrics",
     "source",
@@ -280,7 +271,7 @@ def _panel_config(
 def _table_config(
     table_id: int, table: Dict[str, Any], metrics: Dict[str, Dict[str, Any]]
 ) -> Dict[str, Any]:
-    config_keys = ("title", "header", "source", "columnwise", "cli_style")
+    config_keys = ("title", "header", "source", "columnwise")
     table_config = {"id": table_id}
     table_config.update({key: table[key] for key in config_keys if key in table})
     if "metrics" not in table:
@@ -426,8 +417,6 @@ def _table_shape_errors(table: object) -> List[str]:
     render = _render(table)
     if render not in RENDERS:
         errors.append(f"render {render!r} is not one of {RENDERS}")
-    if "cli_style" in table and table["cli_style"] not in CLI_STYLES:
-        errors.append(f"cli_style {table['cli_style']!r} is not one of {CLI_STYLES}")
     if render == METRIC_TABLE:
         errors.extend(_metric_table_shape_errors(table))
     elif "metrics" in table or "header" in table:

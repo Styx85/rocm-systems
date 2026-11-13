@@ -2,7 +2,6 @@ view: Memory Chart
 alias: memchart
 tables:
 - title: Memory Chart
-  cli_style: mem_chart
   header:
     metric: Metric
     value: Value

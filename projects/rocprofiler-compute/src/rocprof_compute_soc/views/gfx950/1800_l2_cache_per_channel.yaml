@@ -12,7 +12,6 @@ tables:
   metrics:
   - metric: l2.hit_rate
 - title: L2 Cache Hit Rate (Percent)
-  cli_style: simple_box
   header:
     metric: Metric
     expr: Expression
@@ -22,7 +21,6 @@ tables:
   - metric: l2.chan_hit_rate_per_chan
     label: Channel ::_1
 - title: L2 Requests (per normUnit)
-  cli_style: simple_box
   header:
     metric: Metric
     expr: Expression
@@ -32,7 +30,6 @@ tables:
   - metric: l2.chan_req_per_normunit
     label: Channel ::_1
 - title: L2 Requests (per normUnit)
-  cli_style: simple_multiple_bar
   header:
     metric: Metric
     read req: L2 Read
@@ -47,7 +44,6 @@ tables:
       atomic req: l2.chan_atomic
     label: Channel ::_1
 - title: L2-Fabric Requests (per normUnit)
-  cli_style: simple_multiple_bar
   header:
     metric: Metric
     read req: L2-Fabric Read
@@ -62,7 +58,6 @@ tables:
       atomic req: l2.chan_fabric_atomic
     label: Channel ::_1
 - title: L2-Fabric Read Latency (Cycles)
-  cli_style: simple_box
   header:
     metric: Metric
     expr: Expression
@@ -72,7 +67,6 @@ tables:
   - metric: l2.chan_fabric_rd_lat_cycles
     label: Channel ::_1
 - title: L2-Fabric Write and Atomic Latency (Cycles)
-  cli_style: simple_box
   header:
     metric: Metric
     expr: Expression
@@ -82,7 +76,6 @@ tables:
   - metric: l2.chan_fabric_wr_atomic_lat_cycles
     label: Channel ::_1
 - title: L2-Fabric Atomic Latency (Cycles)
-  cli_style: simple_box
   header:
     metric: Metric
     expr: Expression
@@ -92,7 +85,6 @@ tables:
   - metric: l2.chan_fabric_atomic_lat_cycles
     label: Channel ::_1
 - title: L2-Fabric Read Stall (Cycles per normUnit)
-  cli_style: simple_multiple_bar
   header:
     metric: Metric
     ea read stall - pcie: L2-Fabric Read Stall (PCIe)
@@ -107,7 +99,6 @@ tables:
       ea read stall - hbm: l2.chan_fabric_rd_stall_hbm
     label: Channel ::_1
 - title: L2-Fabric Write and Atomic Stall (Cycles per normUnit)
-  cli_style: simple_multiple_bar
   header:
     metric: Metric
     ea write stall - pcie: L2-Fabric Write Stall (PCIe)
@@ -124,7 +115,6 @@ tables:
       ea write stall - starve: l2.chan_fabric_wr_starve
     label: Channel ::_1
 - title: L2-Fabric (128B read requests per normUnit)
-  cli_style: simple_box
   header:
     metric: Metric
     expr: Expression

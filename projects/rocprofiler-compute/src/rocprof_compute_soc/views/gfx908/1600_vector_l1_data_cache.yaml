@@ -2,7 +2,6 @@ view: Vector L1 Data Cache
 alias: vl1d
 tables:
 - title: vL1D Speed-of-Light
-  cli_style: simple_bar
   header:
     metric: Metric
     value: Avg
@@ -17,7 +16,6 @@ tables:
   - metric: vl1d.coalescing
     label: Coalescing
 - title: vL1D cache stall metrics
-  cli_style: simple_box
   header:
     metric: Metric
     expr: Expression

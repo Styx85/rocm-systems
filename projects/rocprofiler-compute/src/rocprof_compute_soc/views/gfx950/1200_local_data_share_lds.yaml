@@ -2,7 +2,6 @@ view: Local Data Share (LDS)
 alias: lds
 tables:
 - title: LDS Speed-of-Light
-  cli_style: simple_bar
   header:
     metric: Metric
     value: Avg

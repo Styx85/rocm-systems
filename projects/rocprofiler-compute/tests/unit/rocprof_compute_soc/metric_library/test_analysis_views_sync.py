@@ -36,7 +36,7 @@ from utils.analysis_views import (
 from utils.utils_common import get_arch_panel_id_to_alias, load_panel_configs
 
 # Table settings that must match the panel's; rows are compared by name.
-TABLE_KEYS = ("title", "header", "cli_style", "source", "columnwise")
+TABLE_KEYS = ("title", "header", "source", "columnwise")
 # Row columns that show no equation.
 NON_EQUATION_COLUMNS = ("unit", "peak", "pct_of_peak")
 # Analysis config panels with no view: the SDK has no PC sampling on gfx908.
