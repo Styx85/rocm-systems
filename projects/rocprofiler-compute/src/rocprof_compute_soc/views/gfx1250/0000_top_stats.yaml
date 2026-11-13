@@ -1,9 +1,0 @@
-view: Top Stats
-alias: topstats
-tables:
-- render: raw_csv_table
-  title: Top Kernels
-  source: pmc_kernel_top.csv
-- render: raw_csv_table
-  title: Dispatch List
-  source: pmc_dispatch_info.csv

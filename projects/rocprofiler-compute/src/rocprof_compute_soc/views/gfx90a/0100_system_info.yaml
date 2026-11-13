@@ -1,7 +1,0 @@
-view: System Info
-alias: sysinfo
-tables:
-- render: raw_csv_table
-  title: System Info
-  source: sysinfo.csv
-  columnwise: true
