@@ -28,7 +28,14 @@ from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import config
-from utils.equation_format import normalize_equation
+from utils.equation_format import (
+    ASTNode,
+    BinaryOpNode,
+    FunctionCallNode,
+    UnaryOpNode,
+    format_equation,
+    parse_equation,
+)
 from utils.utils_common import (
     canonical_config_arch,
     format_table_id,
@@ -53,6 +60,9 @@ CLI_STYLES = (
 MAIN_COLUMNS = ("avg", "value", "expr")
 # Columns that aggregate the main formula over kernels, with the function they apply.
 AGGREGATE_COLUMNS = {"min": "MIN", "max": "MAX", "std dev": "STD"}
+# The functions of a formula that aggregate over kernels; a per-kernel formula drops
+# them.
+KERNEL_AGGREGATES = ("SUM", "AVG")
 VIEW_FIELDS = ("view", "alias", "tables")
 TABLE_FIELDS = (
     "render",
@@ -326,31 +336,22 @@ def _aggregate(column: str, metric: Optional[Dict[str, Any]]) -> str:
     """Return a column's aggregate over kernels of the metric's formula, per kernel."""
     if metric is None:
         return NO_VALUE
-    per_kernel = _per_kernel(metric["formula"])
-    return normalize_equation(f"{AGGREGATE_COLUMNS[column]}({per_kernel})")
+    per_kernel = _per_kernel(parse_equation(metric["formula"]))
+    return format_equation(FunctionCallNode(AGGREGATE_COLUMNS[column], [per_kernel]))
 
 
-def _per_kernel(formula: str) -> str:
-    """Return a formula per kernel: each SUM(x) and AVG(x) over kernels becomes (x)."""
-    text = formula
-    for function in ("SUM(", "AVG("):
-        start = text.find(function)
-        while start != -1:
-            open_paren = start + len(function) - 1
-            close_paren = _closing_paren(text, open_paren)
-            inner = text[open_paren + 1 : close_paren]
-            text = f"{text[:start]}({inner}){text[close_paren + 1 :]}"
-            start = text.find(function)
-    return text
-
-
-def _closing_paren(text: str, open_paren: int) -> int:
-    depth = 0
-    for index in range(open_paren, len(text)):
-        depth += {"(": 1, ")": -1}.get(text[index], 0)
-        if depth == 0:
-            return index
-    raise ValueError(f"unbalanced parentheses in {text!r}")
+def _per_kernel(node: ASTNode) -> ASTNode:
+    """Return a formula tree per kernel: each SUM(x) and AVG(x) becomes x."""
+    if isinstance(node, FunctionCallNode):
+        args = [_per_kernel(arg) for arg in node.args]
+        if node.name in KERNEL_AGGREGATES and len(args) == 1:
+            return args[0]
+        return FunctionCallNode(node.name, args)
+    if isinstance(node, BinaryOpNode):
+        return BinaryOpNode(node.op, _per_kernel(node.left), _per_kernel(node.right))
+    if isinstance(node, UnaryOpNode):
+        return UnaryOpNode(node.op, _per_kernel(node.operand))
+    return node
 
 
 def _peak(row: Dict[str, Any], metric: Optional[Dict[str, Any]]) -> Union[int, str]:
