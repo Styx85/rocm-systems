@@ -13,10 +13,7 @@ tables:
   metrics:
   - metric: vl1d.l2_bw
     label: L2 Cache Bandwidth
-    legacy_id: 4.1.9
   - metric: vl1d.cache_bw
     label: L1 Cache Bandwidth
-    legacy_id: 4.1.10
   - metric: lds.theoretical_bw
     label: LDS Bandwidth
-    legacy_id: 4.1.11

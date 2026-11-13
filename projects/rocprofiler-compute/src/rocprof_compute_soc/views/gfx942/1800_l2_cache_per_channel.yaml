@@ -13,7 +13,6 @@ tables:
     unit: Unit
   metrics:
   - metric: l2.hit_rate
-    legacy_id: 18.1.0
 - id: 1802
   title: L2 Cache Hit Rate (Percent)
   cli_style: simple_box
@@ -25,7 +24,6 @@ tables:
   metrics:
   - metric: l2.chan_hit_rate_per_chan
     label: Channel ::_1
-    legacy_id: 18.2.0
 - id: 1803
   title: L2 Requests (per normUnit)
   cli_style: simple_box
@@ -37,7 +35,6 @@ tables:
   metrics:
   - metric: l2.chan_req_per_normunit
     label: Channel ::_1
-    legacy_id: 18.3.0
 - id: 1804
   title: L2 Requests (per normUnit)
   cli_style: simple_multiple_bar
@@ -54,7 +51,6 @@ tables:
       write req: l2.chan_wr
       atomic req: l2.chan_atomic
     label: Channel ::_1
-    legacy_id: 18.4.0
 - id: 1805
   title: L2-Fabric Requests (per normUnit)
   cli_style: simple_multiple_bar
@@ -71,7 +67,6 @@ tables:
       write req: l2.chan_fabric_wr_atomic
       atomic req: l2.chan_fabric_atomic
     label: Channel ::_1
-    legacy_id: 18.5.0
 - id: 1806
   title: L2-Fabric Read Latency (Cycles)
   cli_style: simple_box
@@ -83,7 +78,6 @@ tables:
   metrics:
   - metric: l2.chan_fabric_rd_lat_cycles
     label: Channel ::_1
-    legacy_id: 18.6.0
 - id: 1807
   title: L2-Fabric Write and Atomic Latency (Cycles)
   cli_style: simple_box
@@ -95,7 +89,6 @@ tables:
   metrics:
   - metric: l2.chan_fabric_wr_atomic_lat_cycles
     label: Channel ::_1
-    legacy_id: 18.7.0
 - id: 1808
   title: L2-Fabric Atomic Latency (Cycles)
   cli_style: simple_box
@@ -107,7 +100,6 @@ tables:
   metrics:
   - metric: l2.chan_fabric_atomic_lat_cycles
     label: Channel ::_1
-    legacy_id: 18.8.0
 - id: 1810
   title: L2-Fabric Write and Atomic Stall (Cycles per normUnit)
   cli_style: simple_multiple_bar
@@ -126,7 +118,6 @@ tables:
       ea write stall - hbm: null
       ea write stall - starve: l2.chan_fabric_wr_starve
     label: Channel ::_1
-    legacy_id: 18.10.0
 - id: 1812
   title: L2-Fabric (128B read requests per normUnit)
   cli_style: simple_box
@@ -138,4 +129,3 @@ tables:
   metrics:
   - metric: l2.chan_fabric_128b_rd_req_per_normunit
     label: Channel ::_1
-    legacy_id: 18.12.0

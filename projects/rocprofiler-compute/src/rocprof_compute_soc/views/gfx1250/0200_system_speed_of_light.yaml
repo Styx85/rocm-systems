@@ -28,20 +28,15 @@ tables:
   - metric: compute.wmma_flops_fp4
   - metric: compute.wmma_iops_int8
   - metric: compute.wmma_iops_int4
-    legacy_id: 2.1.16
   - metric: wgp.active_wgps
-    legacy_id: 2.1.17
   - metric: compute.ipc
-    legacy_id: 2.1.18
   - metric: wave.occupancy
-    legacy_id: 2.1.19
   - metric: txa.lds_bw_load
     label: LDS Read Bandwidth
   - metric: txa.lds_bw_store
     label: LDS Write Bandwidth
   - metric: lds.bank_conflicts_access
     label: LDS Bank Conflicts/Access
-    legacy_id: 2.1.22
   - metric: gl0.hit_rate
     pct_of_peak: false
   - metric: gl0.bw
@@ -53,31 +48,23 @@ tables:
     pct_of_peak: false
   - metric: l2.bw
     label: GL2 Cache BW
-    legacy_id: 2.1.27
   - metric: ea.dram_rd_bw
     label: GL2 to DRAM Read BW
   - metric: ea.dram_wr_bw
     label: GL2 to DRAM Write BW
   - metric: ea.gl2_to_dram_rd_lat
     pct_of_peak: false
-    legacy_id: 2.1.30
   - metric: ea.gl2_to_dram_wr_lat
     pct_of_peak: false
-    legacy_id: 2.1.31
   - metric: sl1d.hit_rate_excl_dup
     label: Scalar Data Cache Hit Rate
     pct_of_peak: false
-    legacy_id: 2.1.32
   - metric: sl1d.bw
     label: Scalar Data Cache BW
-    legacy_id: 2.1.33
   - metric: l1i.hit_rate_excl_dup
     label: Instruction Cache Hit Rate
     pct_of_peak: false
-    legacy_id: 2.1.34
   - metric: l1i.bw
     label: Instruction Cache BW
-    legacy_id: 2.1.35
   - metric: compute.inst_cache_fetch_lat
     pct_of_peak: false
-    legacy_id: 2.1.36

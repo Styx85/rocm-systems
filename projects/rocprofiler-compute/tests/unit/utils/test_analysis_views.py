@@ -50,7 +50,6 @@ BROKEN_VIEW = {
                 {"metric": "compute.ipc", "metrics": {"avg": "compute.ipc"}},
                 {"metrics": {"avg": "compute.ipc"}},
                 {"metric": "compute.salu_util", "values": {"xfer": "HBM"}},
-                {"metric": "compute.valu_util", "legacy_id": {"gfx942": "11.2.3"}},
                 {"metric": "compute.vmem_util", "peak": "theoretical"},
                 {"metric": "compute.mfma_util", "unit": "Percent"},
             ],
@@ -121,9 +120,8 @@ def test_view_schema_errors():
         "[gfx942/1100.yaml] table 1102: row 1: needs a 'label' when it has 'metrics'",
         "[gfx942/1100.yaml] table 1102: row 2: 'values' names 'xfer', which is not a "
         "column",
-        "[gfx942/1100.yaml] table 1102: row 3: 'legacy_id' must be a string",
-        "[gfx942/1100.yaml] table 1102: row 4: 'peak' may only be 'empirical'",
-        "[gfx942/1100.yaml] table 1102: row 5: 'unit' is not a known field",
+        "[gfx942/1100.yaml] table 1102: row 3: 'peak' may only be 'empirical'",
+        "[gfx942/1100.yaml] table 1102: row 4: 'unit' is not a known field",
     ]
 
 
