@@ -29,8 +29,12 @@ from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import config
 from utils.equation_format import normalize_equation
-from utils.utils_common import canonical_config_arch, mapping_field_errors
-from vendored import yaml
+from utils.utils_common import (
+    canonical_config_arch,
+    format_table_id,
+    load_yaml,
+    mapping_field_errors,
+)
 
 # Table kinds, as the panel configs' data source keys; a table without "render" is a
 # metric table.
@@ -127,11 +131,7 @@ def read_view_files(arch: str, views_dir: Optional[Path] = None) -> Dict[Path, A
         Each file's document; none if the arch has no views.
     """
     arch_dir = Path(views_dir or default_views_dir()) / canonical_config_arch(arch)
-    documents = {}
-    for path in sorted(arch_dir.glob("*.yaml")):
-        with open(path, encoding="utf-8") as file:
-            documents[path] = yaml.safe_load(file)
-    return documents
+    return {path: load_yaml(path) for path in sorted(arch_dir.glob("*.yaml"))}
 
 
 def load_views(
@@ -190,7 +190,7 @@ def iter_view_rows(
             if _render(table) != METRIC_TABLE:
                 continue
             for index, row in enumerate(table["metrics"]):
-                yield f"{table_id // 100}.{table_id % 100}.{index}", row
+                yield f"{format_table_id(table_id)}.{index}", row
 
 
 def row_metric_ids(row: Dict[str, Any]) -> List[str]:
