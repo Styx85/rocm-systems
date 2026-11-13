@@ -14,7 +14,7 @@ Until the cutover, each view is one analysis config panel:
 
 Values, units, peaks and descriptions come from the metric library and are not compared.
 The check skips the panels the metric library sync test skips (the roofline panel of an
-arch without a roofline benchmark).
+arch without a roofline benchmark). The views leave out the panels in LEFT_OUT_PANELS.
 """
 
 import json
@@ -39,6 +39,8 @@ from utils.utils_common import get_arch_panel_id_to_alias, load_panel_configs
 TABLE_KEYS = ("title", "header", "cli_style", "source", "columnwise")
 # Row columns that show no equation.
 NON_EQUATION_COLUMNS = ("unit", "peak", "pct_of_peak")
+# Analysis config panels with no view: the SDK has no PC sampling on gfx908.
+LEFT_OUT_PANELS = {"gfx908": (2100,)}
 
 
 def structure_errors(
@@ -48,6 +50,8 @@ def structure_errors(
 ) -> List[str]:
     """Return how one arch's views differ from its analysis configs' structure."""
     expected = load_panel_configs([str(config.analysis_configs_dir / arch)])
+    for panel_id in LEFT_OUT_PANELS.get(arch, ()):
+        del expected[panel_id]
     panel_rows = _panel_rows(expected)
     actual = views_to_panel_configs(views, metrics)
     for file_id in common.unshown_file_ids(arch):
