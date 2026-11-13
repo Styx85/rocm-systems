@@ -14,9 +14,7 @@ tables:
   - metric: compute.valu_flops
   - metric: compute.valu_flops_f64
   - metric: compute.ipc
-    legacy_id: 2.1.2
   - metric: wave.occupancy
-    legacy_id: 2.1.3
   - metric: gl2.hit_rate
     pct_of_peak: false
   - metric: gl2.fabric_rd_bw
@@ -25,14 +23,11 @@ tables:
     label: GL2-Fabric Write BW
   - metric: lds.bank_conflicts
     pct_of_peak: false
-    legacy_id: 2.1.7
   - metric: wave.wait_for_any
     label: Wave Dependency Wait
     pct_of_peak: false
-    legacy_id: 2.1.8
   - metric: wave.issue_wait
     pct_of_peak: false
-    legacy_id: 2.1.9
   - metric: gl0.hit_rate
     label: GL0 Cache Hit Rate (TCP Cache)
     pct_of_peak: false
@@ -45,7 +40,6 @@ tables:
     label: GL1 Cache Read BW
   - metric: l2.bw
     label: GL2 Cache BW
-    legacy_id: 2.1.14
   - metric: sl1d.hit_rate_excl_dup
     label: Scalar Data Cache Hit Rate
     pct_of_peak: false

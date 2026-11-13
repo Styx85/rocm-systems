@@ -13,7 +13,6 @@ tables:
   metrics:
   - metric: spi.workgroup_manager_util
     label: SPI Busy
-    legacy_id: 6.1.0
 - id: 602
   title: Wave Dispatch Statistics
   header:
@@ -24,6 +23,4 @@ tables:
     unit: Unit
   metrics:
   - metric: spi.compute_wave_dispatches
-    legacy_id: 6.2.0
   - metric: spi.wave_dispatch_rate
-    legacy_id: 6.2.1

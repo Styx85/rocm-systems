@@ -31,24 +31,18 @@ tables:
   metrics:
   - metric: compute.ipc
   - metric: compute.ipc_issued
-    legacy_id: 11.2.1
   - metric: compute.salu_util
   - metric: compute.valu_util
   - metric: compute.dual_issue_valu_util
     label: Dual-issue VALU Utilization
-    legacy_id: 11.2.4
   - metric: compute.valu_co_issue_efficiency
-    legacy_id: 11.2.5
   - metric: compute.vmem_util
   - metric: compute.branch_util
   - metric: compute.valu_active_threads
   - metric: compute.mfma_util
   - metric: compute.mfma_inst_cycles
-    legacy_id: 11.2.10
   - metric: compute.vmem_lat
-    legacy_id: 11.2.11
   - metric: compute.smem_lat
-    legacy_id: 11.2.12
 - id: 1103
   title: Arithmetic Operations
   header:
@@ -59,20 +53,11 @@ tables:
     unit: Unit
   metrics:
   - metric: compute.flops_per_norm
-    legacy_id: 11.3.0
   - metric: compute.iops_per_norm
-    legacy_id: 11.3.1
   - metric: compute.f8_ops
-    legacy_id: 11.3.2
   - metric: compute.f16_ops
-    legacy_id: 11.3.3
   - metric: compute.bf16_ops
-    legacy_id: 11.3.4
   - metric: compute.f32_ops
-    legacy_id: 11.3.5
   - metric: compute.f64_ops
-    legacy_id: 11.3.6
   - metric: compute.f6f4_ops
-    legacy_id: 11.3.7
   - metric: compute.int8_ops
-    legacy_id: 11.3.8

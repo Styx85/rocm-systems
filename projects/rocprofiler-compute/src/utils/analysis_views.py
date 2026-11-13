@@ -10,9 +10,8 @@ the metric's name, rounding, the measured peak instead of the theoretical one, a
 literal values of typed columns. views_to_panel_configs() turns an arch's views into
 the panel configs that load_panel_configs() reads from analysis_configs/.
 
-views/<arch>/ holds the views of one metric library arch. "legacy_id" marks the one
-numeric id (11.2.3) each metric keeps from the panel files until numeric ids are
-retired.
+views/<arch>/ holds the views of one metric library arch. A row's numeric id (11.2.3)
+is its position in the views.
 
 Only tools use this module until the cutover; tools/validate_views.py checks the files.
 Standard library and the vendored YAML only: profile mode imports it.
@@ -63,7 +62,6 @@ ROW_FIELDS = (
     "peak",
     "pct_of_peak",
     "values",
-    "legacy_id",
 )
 # The value of a column a row has no value for, as the panel configs write it.
 NO_VALUE = "None"
@@ -376,8 +374,6 @@ def _row_shape_errors(row: object, columns: List[str]) -> List[str]:
         for column in row.get(field, {})
         if column not in columns
     )
-    if not isinstance(row.get("legacy_id", ""), str):
-        errors.append("'legacy_id' must be a string")
     return errors
 
 

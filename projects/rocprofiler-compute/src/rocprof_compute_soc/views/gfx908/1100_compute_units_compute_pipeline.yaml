@@ -21,7 +21,6 @@ tables:
   metrics:
   - metric: compute.ipc
   - metric: compute.ipc_issued
-    legacy_id: 11.2.1
   - metric: compute.salu_util
   - metric: compute.valu_util
   - metric: compute.valu_active_threads

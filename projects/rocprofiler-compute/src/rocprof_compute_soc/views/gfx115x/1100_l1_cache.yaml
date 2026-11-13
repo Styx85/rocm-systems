@@ -12,9 +12,7 @@ tables:
     unit: Unit
   metrics:
   - metric: gl1.busy
-    legacy_id: 11.1.0
   - metric: gl1.starve
-    legacy_id: 11.1.1
 - id: 1102
   title: GL1 Cache Request Statistics
   header:
@@ -26,16 +24,12 @@ tables:
   metrics:
   - metric: gl1.total_req
     label: Total Requests
-    legacy_id: 11.2.0
   - metric: gl1.rd_req
     label: Read Requests
-    legacy_id: 11.2.1
   - metric: gl1.wr_req
     label: Write Requests
-    legacy_id: 11.2.2
   - metric: gl1.miss_req
     label: Miss Requests
-    legacy_id: 11.2.3
 - id: 1103
   title: GL1 Cache Performance
   header:
@@ -58,12 +52,9 @@ tables:
   metrics:
   - metric: gl1.gl2_rd_req
     label: GL2 Read Requests
-    legacy_id: 11.4.0
   - metric: gl1.gl2_rd_128b_req
-    legacy_id: 11.4.1
   - metric: gl1.gl2_wr_req
     label: GL2 Write Requests
-    legacy_id: 11.4.2
 - id: 1105
   title: GL1 Cache Stalls
   header:
@@ -74,7 +65,5 @@ tables:
     unit: Unit
   metrics:
   - metric: gl1.gl2_stall
-    legacy_id: 11.5.0
   - metric: gl1.lfifo_full_stall
     label: LFIFO Full Stall
-    legacy_id: 11.5.1

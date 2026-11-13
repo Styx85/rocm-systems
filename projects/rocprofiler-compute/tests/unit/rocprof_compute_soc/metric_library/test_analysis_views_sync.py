@@ -9,8 +9,7 @@ Until the cutover, each view is one analysis config panel:
 - the same rows in order, leaving out only rows that show no equation (and tables left
   empty by them);
 - each panel's -b alias is the config template's;
-- every row is a row of the same panel table, and every metric the arch shows has one
-  legacy_id, its row's numeric id in the panel file.
+- every row is a row of the same panel table.
 
 Values, units, peaks and descriptions come from the metric library and are not compared.
 The check skips the panels the metric library sync test skips (the roofline panel of an
@@ -18,7 +17,7 @@ arch without a roofline benchmark).
 """
 
 import json
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Set, Tuple
 
 import common
 import pytest
@@ -32,7 +31,6 @@ from utils.analysis_views import (
     load_views,
     panel_aliases,
     row_label,
-    row_metric_ids,
     views_to_panel_configs,
 )
 from utils.utils_common import get_arch_panel_id_to_alias, load_panel_configs
@@ -50,7 +48,7 @@ def structure_errors(
 ) -> List[str]:
     """Return how one arch's views differ from its analysis configs' structure."""
     expected = load_panel_configs([str(config.analysis_configs_dir / arch)])
-    positions = _panel_positions(expected)
+    panel_rows = _panel_rows(expected)
     actual = views_to_panel_configs(views, metrics)
     for file_id in common.unshown_file_ids(arch):
         expected.pop(int(file_id), None)
@@ -64,7 +62,7 @@ def structure_errors(
             for error in _panel_errors(panel, actual[panel_id])
         )
     errors.extend(_alias_errors(views, arch))
-    errors.extend(_legacy_id_errors(views, metrics, positions))
+    errors.extend(_row_errors(views, metrics, panel_rows))
     return errors
 
 
@@ -139,49 +137,33 @@ def _alias_errors(views: List[Dict[str, Any]], arch: str) -> List[str]:
     ]
 
 
-def _legacy_id_errors(
+def _row_errors(
     views: List[Dict[str, Any]],
     metrics: Dict[str, Dict[str, Any]],
-    positions: Dict[Any, str],
+    panel_rows: Set[Tuple[str, str]],
 ) -> List[str]:
-    """Check that each row is a row of the same panel table (positions:
-    _panel_positions()), that a stored legacy_id is that row's numeric id, and that
-    every metric has one legacy_id."""
+    """Check that each row is a row of the same panel table (panel_rows:
+    _panel_rows())."""
     errors = []
-    stored: Dict[str, List[str]] = {}
     for position, row in iter_view_rows(views):
         table = position.rsplit(".", 1)[0]
         name = row_label(row, metrics)
-        old = positions.get((table, name))
-        if old is None:
+        if (table, name) not in panel_rows:
             errors.append(f"{position}: {name!r} is not a row of panel table {table}")
-            continue
-        if row.get("legacy_id", old) != old:
-            errors.append(f"{position}: legacy_id {row['legacy_id']} is not {old}")
-        for metric_id in row_metric_ids(row):
-            stored.setdefault(metric_id, [])
-            if "legacy_id" in row:
-                stored[metric_id].append(row["legacy_id"])
-    errors.extend(
-        f"{metric_id}: has legacy ids {legacy_ids}, not one"
-        for metric_id, legacy_ids in stored.items()
-        if len(legacy_ids) != 1
-    )
     return errors
 
 
-def _panel_positions(panels: Dict[int, Dict[str, Any]]) -> Dict[Any, str]:
-    """Return (table number, row name) -> numeric row id of the panel files' rows."""
-    positions = {}
+def _panel_rows(panels: Dict[int, Dict[str, Any]]) -> Set[Tuple[str, str]]:
+    """Return the (table number, row name) of the panel files' rows."""
+    rows = set()
     for panel in panels.values():
         for source in panel["data source"]:
             render, table = _table(source)
             if render != METRIC_TABLE:
                 continue
             number = f"{table['id'] // 100}.{table['id'] % 100}"
-            for index, name in enumerate(_table_rows(table)):
-                positions[(number, name)] = f"{number}.{index}"
-    return positions
+            rows.update((number, name) for name in _table_rows(table))
+    return rows
 
 
 def swap_rows(views: List[Dict[str, Any]]) -> None:
@@ -203,10 +185,6 @@ def change_alias(views: List[Dict[str, Any]]) -> None:
     next(v for v in views if v["legacy_panel_id"] == 1100)["alias"] = "pipeline"
 
 
-def move_legacy_id(views: List[Dict[str, Any]]) -> None:
-    dict(iter_view_rows(views))["11.2.1"]["legacy_id"] = "11.2.2"
-
-
 def arch_errors(arch: str, views: List[Dict[str, Any]]) -> List[str]:
     metrics = loader.MetricLibrary.load(
         loader.default_metric_library_dir(), arch
@@ -226,7 +204,6 @@ def test_views_keep_the_panel_structure(arch):
         (drop_row, "panel 1100: table 1102: rows"),
         (drop_column, "panel 1100: table 1102: header"),
         (change_alias, "panel 11: -b alias 'pipeline', config template has 'cu_pipe'"),
-        (move_legacy_id, "11.2.1: legacy_id 11.2.2 is not 11.2.1"),
     ],
 )
 def test_a_changed_structure_is_reported(change, error):

@@ -12,12 +12,9 @@ tables:
   metrics:
   - metric: l1i.bw_util
     label: Bandwidth Utilization
-    legacy_id: 13.1.0
   - metric: l1i.hit_rate_incl_dup
     label: Cache Hit Rate
-    legacy_id: 13.1.1
   - metric: l1i.l2_bw_util
-    legacy_id: 13.1.2
 - id: 1302
   title: L1I cache accesses
   header:
@@ -31,13 +28,10 @@ tables:
     label: Req
   - metric: l1i.hits
     label: Hits
-    legacy_id: 13.2.1
   - metric: l1i.misses_non_duplicated
     label: Misses - Non Duplicated
-    legacy_id: 13.2.2
   - metric: l1i.misses_duplicated
     label: Misses - Duplicated
-    legacy_id: 13.2.3
   - metric: l1i.hit_rate_incl_dup
     label: Cache Hit Rate
   - metric: l1i.fetch_lat

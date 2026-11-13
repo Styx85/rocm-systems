@@ -13,9 +13,7 @@ tables:
   metrics:
   - metric: txa.util
     label: Utilization
-    legacy_id: 8.1.0
   - metric: txa.stall_rate
-    legacy_id: 8.1.1
 - id: 802
   title: Shader-TXA Requests - LDS
   header:
@@ -26,7 +24,6 @@ tables:
     unit: Unit
   metrics:
   - metric: txa.lds_insts
-    legacy_id: 8.2.0
   - metric: txa.lds_load_insts
   - metric: txa.lds_store_insts
   - metric: txa.lds_atomics_insts
@@ -41,28 +38,20 @@ tables:
   metrics:
   - metric: txa.buffer_insts
     label: Buffer Instructions
-    legacy_id: 8.3.0
   - metric: txa.buffer_load_insts
     label: Buffer Load Instructions
-    legacy_id: 8.3.1
   - metric: txa.buffer_store_insts
     label: Buffer Store Instructions
-    legacy_id: 8.3.2
   - metric: txa.buffer_atomics_insts
     label: Buffer Atomics Instructions
-    legacy_id: 8.3.3
   - metric: txa.flat_insts
     label: Flat Instructions
-    legacy_id: 8.3.4
   - metric: txa.flat_load_insts
     label: Flat Load Instructions
-    legacy_id: 8.3.5
   - metric: txa.flat_store_insts
     label: Flat Store Instructions
-    legacy_id: 8.3.6
   - metric: txa.flat_atomics_insts
     label: Flat Atomics Instructions
-    legacy_id: 8.3.7
 - id: 804
   title: Shader-TXA Requests - Async Load and Store
   header:
@@ -82,13 +71,10 @@ tables:
     label: Async Direct Store Instruction
   - metric: txa.cluster_load_inst
     label: Cluster Load Instruction
-    legacy_id: 8.4.4
   - metric: txa.async_cluster_load_inst
     label: Async Cluster Load Instruction
-    legacy_id: 8.4.5
   - metric: txa.async_barrier_inst
     label: Async Barrier Instruction
-    legacy_id: 8.4.6
 - id: 805
   title: Shader-TXA Requests - TDM
   header:
@@ -99,13 +85,10 @@ tables:
     unit: Unit
   metrics:
   - metric: txa.tdm_insts
-    legacy_id: 8.5.0
   - metric: txa.tdm_async_load_insts
   - metric: txa.tdm_async_store_insts
   - metric: txa.tdm_async_cluster_load_insts
-    legacy_id: 8.5.3
   - metric: txa.tdm_async_barrier_inst
-    legacy_id: 8.5.4
 - id: 806
   title: Shader-TXA Requests - Block Load and Store
   header:
@@ -117,10 +100,8 @@ tables:
   metrics:
   - metric: txa.block_load_inst
     label: Block Load Instruction
-    legacy_id: 8.6.0
   - metric: txa.block_store_inst
     label: Block Store Instruction
-    legacy_id: 8.6.1
 - id: 807
   title: Shader-TXA Interface
   header:
@@ -132,10 +113,8 @@ tables:
   metrics:
   - metric: txa.req_bus_util
     label: Request Bus Utilization
-    legacy_id: 8.7.0
   - metric: txa.req_bus_util_atomic_data
     label: Request Bus Utilization - Atomic Data
-    legacy_id: 8.7.1
 - id: 808
   title: TXA-VMW Interface
   header:
@@ -147,25 +126,18 @@ tables:
   metrics:
   - metric: txa.command_bus_util
     label: Command Bus Util
-    legacy_id: 8.8.0
   - metric: txa.command_bus_stall_rate
     label: Command Bus Stall Rate
-    legacy_id: 8.8.1
   - metric: txa.vmw_req_bus_util
     label: Request Bus Util
-    legacy_id: 8.8.2
   - metric: txa.req_bus_stall_rate
     label: Request Bus Stall Rate
-    legacy_id: 8.8.3
   - metric: txa.bus_util_lds_req
     label: Bus Util - LDS Requests
-    legacy_id: 8.8.4
   - metric: txa.bus_util_buffer_req
     label: Bus Util - Buffer Requests
-    legacy_id: 8.8.5
   - metric: txa.bus_util_flat_req
     label: Bus Util - Flat Requests
-    legacy_id: 8.8.6
 - id: 809
   title: LDS and GL0 Data Bandwidth
   header:
@@ -185,8 +157,5 @@ tables:
   - metric: txa.tdm_load_bw
   - metric: txa.tdm_store_bw
   - metric: txa.gl0_load_bw
-    legacy_id: 8.9.7
   - metric: txa.gl0_store_bw
-    legacy_id: 8.9.8
   - metric: txa.gl0_atomics_bw
-    legacy_id: 8.9.9
