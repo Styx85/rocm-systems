@@ -23,6 +23,7 @@ from utils.analysis_views import (
     view_schema_errors,
     views_to_panel_configs,
 )
+from utils.utils_common import metric_ids_by_name
 
 ARCH = "gfx942"
 # The instructions gfx942's compute.ipc_issued counts, per kernel.
@@ -67,10 +68,8 @@ def metric_rows(arch):
             table = source.get("metric_table")
             if not table:
                 continue
-            number = f"{table['id'] // 100}.{table['id'] % 100}"
-            names = [name for name in table["metric"] if name != "placeholder_range"]
-            for index, name in enumerate(names):
-                rows[f"{number}.{index}"] = (name, table["metric"][name])
+            for name, metric_id in metric_ids_by_name(table).items():
+                rows[metric_id] = (name, table["metric"][name])
     return views, metrics, rows
 
 
