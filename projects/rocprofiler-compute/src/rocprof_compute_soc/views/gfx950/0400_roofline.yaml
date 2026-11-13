@@ -2,7 +2,6 @@ view: Roofline
 alias: roof
 tables:
 - title: Roofline Performance Rates
-  cli_style: Roofline
   header:
     metric: Metric
     value: Value
@@ -44,7 +43,6 @@ tables:
     label: LDS Bandwidth
     peak: empirical
 - title: Roofline Plot Points
-  cli_style: Roofline
   header:
     metric: Metric
     value: Value

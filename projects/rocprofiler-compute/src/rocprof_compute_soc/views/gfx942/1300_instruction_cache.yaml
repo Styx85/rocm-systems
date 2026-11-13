@@ -2,7 +2,6 @@ view: Instruction Cache
 alias: ins_cache
 tables:
 - title: L1I Speed-of-Light
-  cli_style: simple_bar
   header:
     metric: Metric
     value: Avg

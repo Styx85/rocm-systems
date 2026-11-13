@@ -2,7 +2,6 @@ view: Roofline
 alias: roof
 tables:
 - title: Roofline Performance Rates
-  cli_style: Roofline
   header:
     metric: Metric
     value: Value

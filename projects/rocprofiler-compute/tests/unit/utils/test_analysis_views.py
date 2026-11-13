@@ -39,7 +39,6 @@ BROKEN_VIEW = {
         {
             "title": "Compute Speed-of-Light",
             "render": "chart",
-            "cli_style": "pie",
         },
         {
             "title": "Pipeline Statistics",
@@ -121,8 +120,6 @@ def test_view_schema_errors():
         f"[{source}] 'archs' is not a known field",
         f"[{source}] table 1: render 'chart' is not one of "
         "('metric_table', 'raw_csv_table', 'pc_sampling_table')",
-        f"[{source}] table 1: cli_style 'pie' is not one of "
-        "('simple_box', 'simple_bar', 'simple_multiple_bar', 'mem_chart', 'Roofline')",
         f"[{source}] table 2: row 0: needs one of 'metric' and 'metrics'",
         f"[{source}] table 2: row 1: needs a 'label' when it has 'metrics'",
         f"[{source}] table 2: row 2: 'values' names 'xfer', which is not a column",

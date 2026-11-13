@@ -2,7 +2,6 @@ view: Memory Chart
 alias: memchart
 tables:
 - title: Instruction Cache
-  cli_style: mem_chart
   header:
     metric: Metric
     value: Value
@@ -25,7 +24,6 @@ tables:
   - metric: l1i.icache_gl1_req_lat
     round: 0
 - title: Scalar Data Cache
-  cli_style: mem_chart
   header:
     metric: Metric
     value: Value
@@ -49,7 +47,6 @@ tables:
   - metric: sl1d.dcache_gl1_req_lat
     round: 0
 - title: GL0 Cache (Vector L0)
-  cli_style: mem_chart
   header:
     metric: Metric
     value: Value
@@ -68,7 +65,6 @@ tables:
   - metric: gl0.hit_rate
     round: 0
 - title: LDS (Local Data Share)
-  cli_style: mem_chart
   header:
     metric: Metric
     value: Value
@@ -112,7 +108,6 @@ tables:
     label: TDM Store Requests
     round: 0
 - title: GL0-GL1 Interface
-  cli_style: mem_chart
   header:
     metric: Metric
     value: Value
@@ -129,7 +124,6 @@ tables:
   - metric: gl1.gl1c_buffer_full_stall
     round: 0
 - title: GLARB (GL1-GL2 Arbiter)
-  cli_style: mem_chart
   header:
     metric: Metric
     value: Value
@@ -151,7 +145,6 @@ tables:
     label: GLARB-GL2 Write Bandwidth
   - metric: glarb.gl2_atomic_bw
 - title: GL2 Cache (L2)
-  cli_style: mem_chart
   header:
     metric: Metric
     value: Value
@@ -169,7 +162,6 @@ tables:
   - metric: gl2.ea_hbm_bw_atomic
     label: GL2-EA Atomic Bandwidth
 - title: EA to HBM
-  cli_style: mem_chart
   header:
     metric: Metric
     value: Value
@@ -197,7 +189,6 @@ tables:
     label: EA Stall Rate
     round: 0
 - title: Workgroup Processors (WGPs)
-  cli_style: mem_chart
   header:
     metric: Metric
     value: Value
