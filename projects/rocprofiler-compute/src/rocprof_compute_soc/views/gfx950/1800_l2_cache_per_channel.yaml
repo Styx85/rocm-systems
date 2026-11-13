@@ -1,9 +1,7 @@
 view: L2 Cache (per Channel)
-legacy_panel_id: 1800
 alias: l2_per_channel
 tables:
-- id: 1801
-  title: Aggregate Stats (All channels)
+- title: Aggregate Stats (All channels)
   header:
     metric: Metric
     avg: Avg
@@ -13,8 +11,7 @@ tables:
     unit: Unit
   metrics:
   - metric: l2.hit_rate
-- id: 1802
-  title: L2 Cache Hit Rate (Percent)
+- title: L2 Cache Hit Rate (Percent)
   cli_style: simple_box
   header:
     metric: Metric
@@ -24,8 +21,7 @@ tables:
   metrics:
   - metric: l2.chan_hit_rate_per_chan
     label: Channel ::_1
-- id: 1803
-  title: L2 Requests (per normUnit)
+- title: L2 Requests (per normUnit)
   cli_style: simple_box
   header:
     metric: Metric
@@ -35,8 +31,7 @@ tables:
   metrics:
   - metric: l2.chan_req_per_normunit
     label: Channel ::_1
-- id: 1804
-  title: L2 Requests (per normUnit)
+- title: L2 Requests (per normUnit)
   cli_style: simple_multiple_bar
   header:
     metric: Metric
@@ -51,8 +46,7 @@ tables:
       write req: l2.chan_wr
       atomic req: l2.chan_atomic
     label: Channel ::_1
-- id: 1805
-  title: L2-Fabric Requests (per normUnit)
+- title: L2-Fabric Requests (per normUnit)
   cli_style: simple_multiple_bar
   header:
     metric: Metric
@@ -67,8 +61,7 @@ tables:
       write req: l2.chan_fabric_wr_atomic
       atomic req: l2.chan_fabric_atomic
     label: Channel ::_1
-- id: 1806
-  title: L2-Fabric Read Latency (Cycles)
+- title: L2-Fabric Read Latency (Cycles)
   cli_style: simple_box
   header:
     metric: Metric
@@ -78,8 +71,7 @@ tables:
   metrics:
   - metric: l2.chan_fabric_rd_lat_cycles
     label: Channel ::_1
-- id: 1807
-  title: L2-Fabric Write and Atomic Latency (Cycles)
+- title: L2-Fabric Write and Atomic Latency (Cycles)
   cli_style: simple_box
   header:
     metric: Metric
@@ -89,8 +81,7 @@ tables:
   metrics:
   - metric: l2.chan_fabric_wr_atomic_lat_cycles
     label: Channel ::_1
-- id: 1808
-  title: L2-Fabric Atomic Latency (Cycles)
+- title: L2-Fabric Atomic Latency (Cycles)
   cli_style: simple_box
   header:
     metric: Metric
@@ -100,8 +91,7 @@ tables:
   metrics:
   - metric: l2.chan_fabric_atomic_lat_cycles
     label: Channel ::_1
-- id: 1809
-  title: L2-Fabric Read Stall (Cycles per normUnit)
+- title: L2-Fabric Read Stall (Cycles per normUnit)
   cli_style: simple_multiple_bar
   header:
     metric: Metric
@@ -116,8 +106,7 @@ tables:
       ea read stall - if: l2.chan_fabric_rd_stall_infinity_fabric
       ea read stall - hbm: l2.chan_fabric_rd_stall_hbm
     label: Channel ::_1
-- id: 1810
-  title: L2-Fabric Write and Atomic Stall (Cycles per normUnit)
+- title: L2-Fabric Write and Atomic Stall (Cycles per normUnit)
   cli_style: simple_multiple_bar
   header:
     metric: Metric
@@ -134,8 +123,7 @@ tables:
       ea write stall - hbm: l2.chan_fabric_wr_stall_hbm
       ea write stall - starve: l2.chan_fabric_wr_starve
     label: Channel ::_1
-- id: 1812
-  title: L2-Fabric (128B read requests per normUnit)
+- title: L2-Fabric (128B read requests per normUnit)
   cli_style: simple_box
   header:
     metric: Metric

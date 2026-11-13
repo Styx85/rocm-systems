@@ -1,9 +1,7 @@
 view: GL0 Cache (TCP Cache)
-legacy_panel_id: 900
 alias: gl0
 tables:
-- id: 901
-  title: GL0 Utilization
+- title: GL0 Utilization
   header:
     metric: Metric
     avg: Avg
@@ -12,8 +10,7 @@ tables:
     unit: Unit
   metrics:
   - metric: gl0.busy
-- id: 902
-  title: GL0 Request Statistics
+- title: GL0 Request Statistics
   header:
     metric: Metric
     avg: Avg
@@ -29,8 +26,7 @@ tables:
     label: Write Requests
   - metric: gl0.miss_req
     label: Miss Requests
-- id: 903
-  title: GL0 Cache Performance
+- title: GL0 Cache Performance
   header:
     metric: Metric
     avg: Avg
@@ -40,8 +36,7 @@ tables:
   metrics:
   - metric: gl0.hit_rate
     label: Hit Rate
-- id: 904
-  title: GL0-GL1 Interface
+- title: GL0-GL1 Interface
   header:
     metric: Metric
     avg: Avg
@@ -54,8 +49,7 @@ tables:
   - metric: gl0.gl1_rd_128b_req
   - metric: gl0.gl1_wr_req
     label: GL1 Write Requests
-- id: 905
-  title: GL0 Stalls
+- title: GL0 Stalls
   header:
     metric: Metric
     avg: Avg

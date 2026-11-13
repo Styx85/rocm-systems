@@ -1,9 +1,7 @@
 view: System Speed-of-Light
-legacy_panel_id: 200
 alias: sol
 tables:
-- id: 201
-  title: System Speed-of-Light
+- title: System Speed-of-Light
   header:
     metric: Metric
     value: Avg

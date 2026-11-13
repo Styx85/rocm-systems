@@ -1,9 +1,7 @@
 view: UTCL1 (Translation Cache L1)
-legacy_panel_id: 1600
 alias: utcl1
 tables:
-- id: 1601
-  title: UTCL1 Metrics
+- title: UTCL1 Metrics
   header:
     metric: Metric
     avg: Avg

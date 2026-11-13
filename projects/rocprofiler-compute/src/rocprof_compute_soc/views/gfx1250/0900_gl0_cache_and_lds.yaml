@@ -1,9 +1,7 @@
 view: GL0 Cache and LDS
-legacy_panel_id: 900
 alias: gl0
 tables:
-- id: 901
-  title: WGP Cache Utilization (LDS + GL0)
+- title: WGP Cache Utilization (LDS + GL0)
   header:
     metric: Metric
     avg: Avg
@@ -13,8 +11,7 @@ tables:
   metrics:
   - metric: gl0.util
     label: Utilization
-- id: 902
-  title: Cache Requests
+- title: Cache Requests
   header:
     metric: Metric
     avg: Avg
@@ -35,8 +32,7 @@ tables:
   - metric: gl0.total_gl0_sectors
   - metric: gl0.rd_sectors
   - metric: gl0.wr_sectors
-- id: 903
-  title: Cache Lookup
+- title: Cache Lookup
   header:
     metric: Metric
     avg: Avg
@@ -71,8 +67,7 @@ tables:
     label: Cache RAM Bank Conflict Stall Rate - Write
   - metric: gl0.segment_conflict_stall_rate_cache
     label: Segment Conflict Stall Rate - Cache
-- id: 904
-  title: LDS Accesses
+- title: LDS Accesses
   header:
     metric: Metric
     avg: Avg
@@ -92,8 +87,7 @@ tables:
   - metric: lds.segment_conflict_stall_rate_lds
     label: Segment Conflict Stall Rate - LDS
   - metric: lds.stall_rate
-- id: 905
-  title: Set-Slot Dynamics
+- title: Set-Slot Dynamics
   header:
     metric: Metric
     avg: Avg
@@ -111,8 +105,7 @@ tables:
     label: Slot Replacement Stall - Same Port
   - metric: gl0.slot_replacement_stall_cross_port
     label: Slot Replacement Stall - Cross Port
-- id: 906
-  title: GL0-GL1 Interface - Requests and Bandwidth
+- title: GL0-GL1 Interface - Requests and Bandwidth
   header:
     metric: Metric
     avg: Avg
@@ -129,8 +122,7 @@ tables:
   - metric: gl0.gl1_cluster_req
   - metric: gl0.gl1_prefetch_req_cu_scope
   - metric: gl0.gl1_prefetch_req_gl2_scope
-- id: 907
-  title: GL0-GL1 Interface - Latency
+- title: GL0-GL1 Interface - Latency
   header:
     metric: Metric
     avg: Avg
@@ -141,8 +133,7 @@ tables:
   - metric: gl0.gl1_rd_lat
   - metric: gl0.gl1_wr_lat
   - metric: gl0.gl1_cluster_req_lat
-- id: 908
-  title: GL0-GL1 Interface - Stalls
+- title: GL0-GL1 Interface - Stalls
   header:
     metric: Metric
     avg: Avg
@@ -154,8 +145,7 @@ tables:
   - metric: gl0.ram_rd_stall_by_gl1_wr
   - metric: gl0.wr_stall_rate_gl1_rd_return
     label: GL0 Cache RAM Write Stall by GL1 Return
-- id: 909
-  title: GL0-UTCL0 Interface
+- title: GL0-UTCL0 Interface
   header:
     metric: Metric
     avg: Avg
@@ -165,8 +155,7 @@ tables:
   metrics:
   - metric: gl0.utcl0_req
   - metric: gl0.utcl0_thrash_stall_rate
-- id: 910
-  title: UTCL0-UTCL1 Interface
+- title: UTCL0-UTCL1 Interface
   header:
     metric: Metric
     avg: Avg
@@ -183,8 +172,7 @@ tables:
   - metric: gl0.utcl0_utcl1_returns_no_retry_fault
   - metric: gl0.utcl1_req_lat
   - metric: gl0.utcl1_req_stall
-- id: 911
-  title: UTCL0 Lookup
+- title: UTCL0 Lookup
   header:
     metric: Metric
     avg: Avg

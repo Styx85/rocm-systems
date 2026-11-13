@@ -1,9 +1,7 @@
 view: Scalar L1 Data Cache
-legacy_panel_id: 1400
 alias: sl1d
 tables:
-- id: 1401
-  title: Scalar L1D Speed-of-Light
+- title: Scalar L1D Speed-of-Light
   cli_style: simple_bar
   header:
     metric: Metric
@@ -16,8 +14,7 @@ tables:
     label: Cache Hit Rate
   - metric: sl1d.l2_bw_util
     label: sL1D-L2 BW Utilization
-- id: 1402
-  title: Scalar L1D cache accesses
+- title: Scalar L1D cache accesses
   header:
     metric: Metric
     avg: Avg
@@ -49,8 +46,7 @@ tables:
     label: Read Req (8 DWord)
   - metric: sl1d.rd_req_16_dword
     label: Read Req (16 DWord)
-- id: 1403
-  title: Scalar L1D Cache - L2 Interface
+- title: Scalar L1D Cache - L2 Interface
   header:
     metric: Metric
     avg: Avg

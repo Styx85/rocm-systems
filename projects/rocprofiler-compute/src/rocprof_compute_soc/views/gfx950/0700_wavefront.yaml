@@ -1,9 +1,7 @@
 view: Wavefront
-legacy_panel_id: 700
 alias: wavefront
 tables:
-- id: 701
-  title: Wavefront Launch Stats
+- title: Wavefront Launch Stats
   header:
     metric: Metric
     avg: Avg
@@ -22,8 +20,7 @@ tables:
   - metric: dispatch.sgprs
   - metric: dispatch.lds_allocation
   - metric: dispatch.scratch_allocation
-- id: 702
-  title: Wavefront Runtime Stats
+- title: Wavefront Runtime Stats
   header:
     metric: Metric
     avg: Avg

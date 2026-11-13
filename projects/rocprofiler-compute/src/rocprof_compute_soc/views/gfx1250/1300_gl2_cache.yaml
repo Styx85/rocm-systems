@@ -1,9 +1,7 @@
 view: GL2 Cache
-legacy_panel_id: 1300
 alias: gl2
 tables:
-- id: 1301
-  title: GL2A Processing
+- title: GL2A Processing
   header:
     metric: Metric
     avg: Avg
@@ -25,8 +23,7 @@ tables:
   - metric: gl2.gl2c1_gl2a_return_stall_rate
   - metric: gl2.gl2c2_gl2a_return_stall_rate
   - metric: gl2.gl2c3_gl2a_return_stall_rate
-- id: 1310
-  title: GL2C Utilization
+- title: GL2C Utilization
   header:
     metric: Metric
     avg: Avg
@@ -36,8 +33,7 @@ tables:
   metrics:
   - metric: gl2.util
     label: GL2C Utilization
-- id: 1311
-  title: GL2C Cache Lookup
+- title: GL2C Cache Lookup
   header:
     metric: Metric
     avg: Avg
@@ -52,8 +48,7 @@ tables:
   - metric: gl2.tag_stall_set_full
   - metric: gl2.tag_stall_writeback_fifo_full
   - metric: gl2.tag_stall_cached_ea_fifo_full
-- id: 1302
-  title: GL2C-EA Stalls
+- title: GL2C-EA Stalls
   header:
     metric: Metric
     avg: Avg
@@ -70,8 +65,7 @@ tables:
   - metric: gl2.ea_data_stall_on_vc4
   - metric: gl2.ea_data_stall_on_vc6
   - metric: gl2.ea_data_stall_on_vc7
-- id: 1303
-  title: GL2C-EA Interface - Latencies
+- title: GL2C-EA Interface - Latencies
   header:
     metric: Metric
     avg: Avg
@@ -82,8 +76,7 @@ tables:
   - metric: gl2.ea_rd_lat
   - metric: gl2.ea_wr_lat
   - metric: gl2.ea_atomic_lat
-- id: 1304
-  title: GL2C-EA Interface - HBM Bandwidth
+- title: GL2C-EA Interface - HBM Bandwidth
   header:
     metric: Metric
     avg: Avg
@@ -94,8 +87,7 @@ tables:
   - metric: gl2.ea_hbm_bw_rd
   - metric: gl2.ea_hbm_bw_wr
   - metric: gl2.ea_hbm_bw_atomic
-- id: 1305
-  title: GL2C-EA Interface - Host CPU Bandwidth
+- title: GL2C-EA Interface - Host CPU Bandwidth
   header:
     metric: Metric
     avg: Avg
@@ -106,8 +98,7 @@ tables:
   - metric: gl2.ea_host_cpu_bw_rd
   - metric: gl2.ea_host_cpu_bw_wr
   - metric: gl2.ea_host_cpu_bw_atomic
-- id: 1306
-  title: GL2C-EA Interface - PCIe Bandwidth
+- title: GL2C-EA Interface - PCIe Bandwidth
   header:
     metric: Metric
     avg: Avg
@@ -118,8 +109,7 @@ tables:
   - metric: gl2.ea_pcie_bw_rd
   - metric: gl2.ea_pcie_bw_wr
   - metric: gl2.ea_pcie_bw_atomic
-- id: 1307
-  title: GL2C-EA Interface - Remote Node Bandwidth
+- title: GL2C-EA Interface - Remote Node Bandwidth
   header:
     metric: Metric
     avg: Avg
@@ -130,8 +120,7 @@ tables:
   - metric: gl2.ea_remote_node_bw_rd
   - metric: gl2.ea_remote_node_bw_wr
   - metric: gl2.ea_remote_node_bw_atomic
-- id: 1308
-  title: GL2C-EA Interface - Remote Memory Bandwidth (Same Node)
+- title: GL2C-EA Interface - Remote Memory Bandwidth (Same Node)
   header:
     metric: Metric
     avg: Avg

@@ -1,9 +1,7 @@
 view: Workgroup Processor (WGP)
-legacy_panel_id: 700
 alias: wgp
 tables:
-- id: 701
-  title: Utilization
+- title: Utilization
   header:
     metric: Metric
     avg: Avg
@@ -14,8 +12,7 @@ tables:
   - metric: wgp.util
   - metric: wgp.wall_clock
   - metric: wgp.active_wgps
-- id: 702
-  title: Wavefront Launch Stats
+- title: Wavefront Launch Stats
   header:
     metric: Metric
     avg: Avg
@@ -30,8 +27,7 @@ tables:
   - metric: dispatch.sgprs
   - metric: dispatch.lds_allocation
   - metric: dispatch.scratch_allocation
-- id: 703
-  title: Wavefront Dispatch
+- title: Wavefront Dispatch
   header:
     metric: Metric
     avg: Avg
@@ -42,8 +38,7 @@ tables:
   - metric: wave.dispatched_wavefronts
     label: Dispatched Wavefronts
   - metric: wave.dispatched_threads
-- id: 704
-  title: Wavefront Life
+- title: Wavefront Life
   header:
     metric: Metric
     avg: Avg
@@ -52,8 +47,7 @@ tables:
     unit: Unit
   metrics:
   - metric: wave.life
-- id: 705
-  title: Wavefront Instruction Mix
+- title: Wavefront Instruction Mix
   header:
     metric: Metric
     avg: Avg
@@ -70,8 +64,7 @@ tables:
   - metric: compute.insts_double_precision
   - metric: compute.insts_vmem
   - metric: compute.insts_lds
-- id: 706
-  title: VMEM Instruction Mix
+- title: VMEM Instruction Mix
   header:
     metric: Metric
     avg: Avg
@@ -94,8 +87,7 @@ tables:
   - metric: compute.insts_async_load
   - metric: compute.insts_async_store
   - metric: compute.insts_tdm
-- id: 707
-  title: LDS Instruction Mix
+- title: LDS Instruction Mix
   header:
     metric: Metric
     avg: Avg
@@ -109,8 +101,7 @@ tables:
   - metric: compute.insts_lds_atomic_return
   - metric: compute.insts_lds_atomic_non_return
   - metric: compute.insts_lds_other
-- id: 708
-  title: VALU Instruction Mix
+- title: VALU Instruction Mix
   header:
     metric: Metric
     avg: Avg
@@ -128,8 +119,7 @@ tables:
   - metric: compute.valu_insts_smacc
   - metric: compute.valu_insts_xdl
   - metric: compute.valu_insts_wmma
-- id: 709
-  title: VALU FLOPs and IOPs Counting
+- title: VALU FLOPs and IOPs Counting
   header:
     metric: Metric
     avg: Avg
@@ -144,8 +134,7 @@ tables:
   - metric: compute.valu_fp_operations_fp32_trans
   - metric: compute.valu_fp_operations_fp64
   - metric: compute.valu_fp_operations_fp64_trans
-- id: 710
-  title: WMMA Instruction FLOPs and IOPs Counting
+- title: WMMA Instruction FLOPs and IOPs Counting
   header:
     metric: Metric
     avg: Avg
@@ -163,8 +152,7 @@ tables:
   - metric: compute.wmma_fp_operations_fp6fp4
   - metric: compute.wmma_int_operations_int8
   - metric: compute.wmma_int_operations_int4
-- id: 711
-  title: Instruction Issue Stalls
+- title: Instruction Issue Stalls
   header:
     metric: Metric
     avg: Avg
@@ -173,8 +161,7 @@ tables:
     unit: Unit
   metrics:
   - metric: compute.tdm_issue_stall_rate
-- id: 712
-  title: Compute Pipeline Utilization
+- title: Compute Pipeline Utilization
   header:
     metric: Metric
     avg: Avg
@@ -186,8 +173,7 @@ tables:
   - metric: compute.pipeline_util_smacc
   - metric: compute.pipeline_util_double_precision
   - metric: compute.pipeline_util_xdl
-- id: 713
-  title: WGP Latencies
+- title: WGP Latencies
   header:
     metric: Metric
     avg: Avg
@@ -196,8 +182,7 @@ tables:
     unit: Unit
   metrics:
   - metric: lds.access_lat
-- id: 714
-  title: WGP-TXA Interface
+- title: WGP-TXA Interface
   header:
     metric: Metric
     avg: Avg
@@ -223,8 +208,7 @@ tables:
     label: Bus Utilization - Row1
   - metric: wgp.bus_stall_rate_row1
     label: Bus Stall Rate - Row1
-- id: 715
-  title: WGP-TXD Interface
+- title: WGP-TXD Interface
   header:
     metric: Metric
     avg: Avg
@@ -233,8 +217,7 @@ tables:
     unit: Unit
   metrics:
   - metric: wgp.txd_data_bus_util
-- id: 716
-  title: Instruction Cache
+- title: Instruction Cache
   header:
     metric: Metric
     avg: Avg
@@ -244,8 +227,7 @@ tables:
   metrics:
   - metric: l1i.hit_rate_excl_dup
     label: Icache Hit Rate
-- id: 717
-  title: Scalar Data Cache
+- title: Scalar Data Cache
   header:
     metric: Metric
     avg: Avg
@@ -257,8 +239,7 @@ tables:
     label: Dcache Hit Rate
   - metric: sl1d.req_bw_norm
     label: Dcache Request Bandwidth
-- id: 718
-  title: SQC-GL1 Interface
+- title: SQC-GL1 Interface
   header:
     metric: Metric
     avg: Avg

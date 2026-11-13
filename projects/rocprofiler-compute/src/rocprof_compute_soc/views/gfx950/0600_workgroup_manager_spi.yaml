@@ -1,9 +1,7 @@
 view: Workgroup Manager (SPI)
-legacy_panel_id: 600
 alias: spi
 tables:
-- id: 601
-  title: Workgroup manager utilizations
+- title: Workgroup manager utilizations
   header:
     metric: Metric
     avg: Avg
@@ -23,8 +21,7 @@ tables:
   - metric: spi.dispatched_wavefronts
   - metric: spi.vgpr_writes
   - metric: spi.sgpr_writes
-- id: 602
-  title: Workgroup Manager - Resource Allocation
+- title: Workgroup Manager - Resource Allocation
   header:
     metric: Metric
     avg: Avg

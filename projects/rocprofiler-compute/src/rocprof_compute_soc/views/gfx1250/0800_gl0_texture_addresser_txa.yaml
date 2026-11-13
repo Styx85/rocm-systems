@@ -1,9 +1,7 @@
 view: GL0 Texture Addresser (TXA)
-legacy_panel_id: 800
 alias: txa
 tables:
-- id: 801
-  title: TXA Utilization
+- title: TXA Utilization
   header:
     metric: Metric
     avg: Avg
@@ -14,8 +12,7 @@ tables:
   - metric: txa.util
     label: Utilization
   - metric: txa.stall_rate
-- id: 802
-  title: Shader-TXA Requests - LDS
+- title: Shader-TXA Requests - LDS
   header:
     metric: Metric
     avg: Avg
@@ -27,8 +24,7 @@ tables:
   - metric: txa.lds_load_insts
   - metric: txa.lds_store_insts
   - metric: txa.lds_atomics_insts
-- id: 803
-  title: Shader-TXA Requests - VMEM
+- title: Shader-TXA Requests - VMEM
   header:
     metric: Metric
     avg: Avg
@@ -52,8 +48,7 @@ tables:
     label: Flat Store Instructions
   - metric: txa.flat_atomics_insts
     label: Flat Atomics Instructions
-- id: 804
-  title: Shader-TXA Requests - Async Load and Store
+- title: Shader-TXA Requests - Async Load and Store
   header:
     metric: Metric
     avg: Avg
@@ -75,8 +70,7 @@ tables:
     label: Async Cluster Load Instruction
   - metric: txa.async_barrier_inst
     label: Async Barrier Instruction
-- id: 805
-  title: Shader-TXA Requests - TDM
+- title: Shader-TXA Requests - TDM
   header:
     metric: Metric
     avg: Avg
@@ -89,8 +83,7 @@ tables:
   - metric: txa.tdm_async_store_insts
   - metric: txa.tdm_async_cluster_load_insts
   - metric: txa.tdm_async_barrier_inst
-- id: 806
-  title: Shader-TXA Requests - Block Load and Store
+- title: Shader-TXA Requests - Block Load and Store
   header:
     metric: Metric
     avg: Avg
@@ -102,8 +95,7 @@ tables:
     label: Block Load Instruction
   - metric: txa.block_store_inst
     label: Block Store Instruction
-- id: 807
-  title: Shader-TXA Interface
+- title: Shader-TXA Interface
   header:
     metric: Metric
     avg: Avg
@@ -115,8 +107,7 @@ tables:
     label: Request Bus Utilization
   - metric: txa.req_bus_util_atomic_data
     label: Request Bus Utilization - Atomic Data
-- id: 808
-  title: TXA-VMW Interface
+- title: TXA-VMW Interface
   header:
     metric: Metric
     avg: Avg
@@ -138,8 +129,7 @@ tables:
     label: Bus Util - Buffer Requests
   - metric: txa.bus_util_flat_req
     label: Bus Util - Flat Requests
-- id: 809
-  title: LDS and GL0 Data Bandwidth
+- title: LDS and GL0 Data Bandwidth
   header:
     metric: Metric
     avg: Avg

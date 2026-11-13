@@ -1,9 +1,7 @@
 view: Graphics Core Efficiency Arbiter (GCEA)
-legacy_panel_id: 1400
 alias: gcea
 tables:
-- id: 1401
-  title: DRAM Read Interface
+- title: DRAM Read Interface
   header:
     metric: Metric
     avg: Avg
@@ -16,8 +14,7 @@ tables:
   - metric: gcea.dram_rd_banks_active
   - metric: gcea.dram_rd_size_32b_increments
     label: DRAM Read Size (32B increments)
-- id: 1402
-  title: DRAM Write Interface
+- title: DRAM Write Interface
   header:
     metric: Metric
     avg: Avg
@@ -30,8 +27,7 @@ tables:
   - metric: gcea.dram_wr_banks_active
   - metric: gcea.dram_wr_size_32b_increments
     label: DRAM Write Size (32B increments)
-- id: 1404
-  title: System Arbiter (SARB)
+- title: System Arbiter (SARB)
   header:
     metric: Metric
     avg: Avg
@@ -44,8 +40,7 @@ tables:
   - metric: gcea.sarb_starving
   - metric: gcea.sarb_total_req
   - metric: gcea.sarb_dram_req
-- id: 1405
-  title: Return Interface
+- title: Return Interface
   header:
     metric: Metric
     avg: Avg

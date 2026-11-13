@@ -1,9 +1,7 @@
 view: Address Processing Unit and Data Return Path (TA/TD)
-legacy_panel_id: 1500
 alias: tatd
 tables:
-- id: 1501
-  title: Busy and stall metrics
+- title: Busy and stall metrics
   header:
     metric: Metric
     avg: Avg
@@ -18,8 +16,7 @@ tables:
     label: Data Stall
   - metric: ta.data_processor_address_stall
     label: "Data-Processor \u2192 Address Stall"
-- id: 1502
-  title: Instruction counts
+- title: Instruction counts
   header:
     metric: Metric
     avg: Avg
@@ -45,8 +42,7 @@ tables:
     label: Spill/Stack Write Instructions
   - metric: ta.spill_atomic_insts
     label: Spill/Stack Atomic Instructions
-- id: 1503
-  title: Spill and stack metrics
+- title: Spill and stack metrics
   header:
     metric: Metric
     avg: Avg
@@ -60,8 +56,7 @@ tables:
     label: Spill/Stack Coalesced Read
   - metric: ta.spill_stack_coalesced_wr
     label: Spill/Stack Coalesced Write
-- id: 1504
-  title: Vector L1 data-return path or Texture Data (TD)
+- title: Vector L1 data-return path or Texture Data (TD)
   header:
     metric: Metric
     avg: Avg

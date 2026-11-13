@@ -1,9 +1,7 @@
 view: Memory Chart
-legacy_panel_id: 300
 alias: memchart
 tables:
-- id: 301
-  title: Memory Chart
+- title: Memory Chart
   cli_style: mem_chart
   header:
     metric: Metric

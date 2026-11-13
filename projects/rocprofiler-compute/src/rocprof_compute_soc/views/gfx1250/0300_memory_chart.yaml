@@ -1,9 +1,7 @@
 view: Memory Chart
-legacy_panel_id: 300
 alias: memchart
 tables:
-- id: 301
-  title: Instruction Cache
+- title: Instruction Cache
   cli_style: mem_chart
   header:
     metric: Metric
@@ -26,8 +24,7 @@ tables:
     label: ICache-GL1 Read Bandwidth
   - metric: l1i.icache_gl1_req_lat
     round: 0
-- id: 302
-  title: Scalar Data Cache
+- title: Scalar Data Cache
   cli_style: mem_chart
   header:
     metric: Metric
@@ -51,8 +48,7 @@ tables:
     label: Dcache-GL1 Read Bandwidth
   - metric: sl1d.dcache_gl1_req_lat
     round: 0
-- id: 303
-  title: GL0 Cache (Vector L0)
+- title: GL0 Cache (Vector L0)
   cli_style: mem_chart
   header:
     metric: Metric
@@ -71,8 +67,7 @@ tables:
     round: 0
   - metric: gl0.hit_rate
     round: 0
-- id: 304
-  title: LDS (Local Data Share)
+- title: LDS (Local Data Share)
   cli_style: mem_chart
   header:
     metric: Metric
@@ -116,8 +111,7 @@ tables:
   - metric: txa.tdm_async_store_insts
     label: TDM Store Requests
     round: 0
-- id: 305
-  title: GL0-GL1 Interface
+- title: GL0-GL1 Interface
   cli_style: mem_chart
   header:
     metric: Metric
@@ -134,8 +128,7 @@ tables:
     round: 0
   - metric: gl1.gl1c_buffer_full_stall
     round: 0
-- id: 306
-  title: GLARB (GL1-GL2 Arbiter)
+- title: GLARB (GL1-GL2 Arbiter)
   cli_style: mem_chart
   header:
     metric: Metric
@@ -157,8 +150,7 @@ tables:
   - metric: glarb.glarbc_req_bw_wr
     label: GLARB-GL2 Write Bandwidth
   - metric: glarb.gl2_atomic_bw
-- id: 307
-  title: GL2 Cache (L2)
+- title: GL2 Cache (L2)
   cli_style: mem_chart
   header:
     metric: Metric
@@ -176,8 +168,7 @@ tables:
     label: GL2-EA Write Bandwidth
   - metric: gl2.ea_hbm_bw_atomic
     label: GL2-EA Atomic Bandwidth
-- id: 308
-  title: EA to HBM
+- title: EA to HBM
   cli_style: mem_chart
   header:
     metric: Metric
@@ -205,8 +196,7 @@ tables:
   - metric: ea.stalled_by_sdp
     label: EA Stall Rate
     round: 0
-- id: 309
-  title: Workgroup Processors (WGPs)
+- title: Workgroup Processors (WGPs)
   cli_style: mem_chart
   header:
     metric: Metric

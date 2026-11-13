@@ -1,9 +1,7 @@
 view: Memory Chart
-legacy_panel_id: 300
 alias: memchart
 tables:
-- id: 301
-  title: Instruction Cache
+- title: Instruction Cache
   cli_style: mem_chart
   header:
     metric: Metric
@@ -16,8 +14,7 @@ tables:
     label: ICache Hit Rate
   - metric: l1i.gl1_rd_bw
     label: ICache-GL1 Read Bandwidth
-- id: 302
-  title: Scalar Data Cache
+- title: Scalar Data Cache
   cli_style: mem_chart
   header:
     metric: Metric
@@ -30,8 +27,7 @@ tables:
     label: DCache Hit Rate
   - metric: sl1d.gl1_rd_bw
     label: DCache-GL1 Read Bandwidth
-- id: 303
-  title: TCP Cache (GL0 Vector Cache)
+- title: TCP Cache (GL0 Vector Cache)
   cli_style: mem_chart
   header:
     metric: Metric
@@ -46,8 +42,7 @@ tables:
     label: GL0 Cache Hit Rate (TCP Cache)
   - metric: gl0.bw
     label: GL0 Cache BW (TCP Cache)
-- id: 304
-  title: LDS (Local Data Share)
+- title: LDS (Local Data Share)
   cli_style: mem_chart
   header:
     metric: Metric
@@ -60,8 +55,7 @@ tables:
   - metric: lds.bank_conflict_rate
   - metric: lds.theoretical_bw
     label: LDS Estimated Bandwidth
-- id: 305
-  title: TCP-GL1 Interface
+- title: TCP-GL1 Interface
   cli_style: mem_chart
   header:
     metric: Metric
@@ -72,8 +66,7 @@ tables:
     label: TCP-GL1 Read Bandwidth
   - metric: gl0.gl1_wr_bw
     label: TCP-GL1 Write Bandwidth
-- id: 306
-  title: GL1 Cache (L1)
+- title: GL1 Cache (L1)
   cli_style: mem_chart
   header:
     metric: Metric
@@ -84,8 +77,7 @@ tables:
   - metric: gl1.hit_rate
     label: GL1 Cache Hit Rate
   - metric: gl1.stall_gl2_backpressure
-- id: 307
-  title: GL1-GL2 Interface
+- title: GL1-GL2 Interface
   cli_style: mem_chart
   header:
     metric: Metric
@@ -94,8 +86,7 @@ tables:
   metrics:
   - metric: gl1.gl2_rd_bw
   - metric: gl1.gl2_wr_bw
-- id: 308
-  title: GL2 Cache (L2)
+- title: GL2 Cache (L2)
   cli_style: mem_chart
   header:
     metric: Metric
@@ -108,8 +99,7 @@ tables:
     label: GL2-Fabric Read BW
   - metric: gl2.fabric_wr_bw
     label: GL2-Fabric Write BW
-- id: 309
-  title: Graphics Core Efficiency Arbiter (GCEA) to System Memory
+- title: Graphics Core Efficiency Arbiter (GCEA) to System Memory
   cli_style: mem_chart
   header:
     metric: Metric
@@ -120,8 +110,7 @@ tables:
   - metric: gcea.sysarb_stall_rate
   - metric: gcea.dram_rd_bw
   - metric: gcea.dram_wr_bw
-- id: 310
-  title: Workgroup Processors (WGPs)
+- title: Workgroup Processors (WGPs)
   cli_style: mem_chart
   header:
     metric: Metric

@@ -1,9 +1,7 @@
 view: Local Data Share (LDS)
-legacy_panel_id: 1200
 alias: lds
 tables:
-- id: 1201
-  title: LDS Speed-of-Light
+- title: LDS Speed-of-Light
   cli_style: simple_bar
   header:
     metric: Metric
@@ -18,8 +16,7 @@ tables:
     label: Theoretical Bandwidth Utilization
   - metric: lds.bank_conflict_rate
     label: Bank Conflict Rate
-- id: 1202
-  title: LDS Statistics
+- title: LDS Statistics
   header:
     metric: Metric
     avg: Avg

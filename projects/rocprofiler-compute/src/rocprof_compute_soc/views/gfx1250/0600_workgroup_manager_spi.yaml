@@ -1,9 +1,7 @@
 view: Workgroup Manager (SPI)
-legacy_panel_id: 600
 alias: spi
 tables:
-- id: 601
-  title: Utilization
+- title: Utilization
   header:
     metric: Metric
     avg: Avg
@@ -12,8 +10,7 @@ tables:
     unit: Unit
   metrics:
   - metric: spi.util
-- id: 602
-  title: Wavefront Dispatch
+- title: Wavefront Dispatch
   header:
     metric: Metric
     avg: Avg
@@ -32,8 +29,7 @@ tables:
   - metric: spi.context_save_rate
   - metric: spi.context_restore_rate
   - metric: spi.wavefront_dispatch_fifo_full_rate
-- id: 603
-  title: Resource Allocation
+- title: Resource Allocation
   header:
     metric: Metric
     avg: Avg
@@ -57,8 +53,7 @@ tables:
     label: Alloc Failure - Named Barriers Full
   - metric: spi.alloc_failure_temp_space_full
     label: Alloc Failure - Temp Space Full
-- id: 604
-  title: CPC-SPI Interface
+- title: CPC-SPI Interface
   header:
     metric: Metric
     avg: Avg
