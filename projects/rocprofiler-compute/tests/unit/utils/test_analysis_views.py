@@ -105,16 +105,19 @@ def test_panel_descriptions_come_from_the_library():
 
 
 def test_view_schema_errors():
-    """A broken view, a second view of its panel, and a file name without a panel id."""
+    """A broken view, a second view of its panel, a file name without a panel id, and
+    a file for a built-in view."""
     source = "gfx942/1100_compute_pipeline.yaml"
     errors = view_schema_errors({
         source: BROKEN_VIEW,
         "gfx942/1100_copy.yaml": {"view": "Copy", "tables": []},
         "gfx942/compute.yaml": {"view": "Compute", "tables": []},
+        "gfx942/0000_top_stats.yaml": {"view": "Top Stats", "tables": []},
     })
     assert errors == [
         "[gfx942/compute.yaml] the file name must be the panel id and the view name, "
         "e.g. 0300_memory_chart.yaml",
+        "[gfx942/0000_top_stats.yaml] panel 0 is a built-in view",
         f"[{source}, gfx942/1100_copy.yaml] panel 1100 has more than one view file",
         f"[{source}] 'archs' is not a known field",
         f"[{source}] table 1: render 'chart' is not one of "

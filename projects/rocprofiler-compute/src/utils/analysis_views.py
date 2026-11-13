@@ -10,15 +10,18 @@ the metric's name, rounding, the measured peak instead of the theoretical one, a
 literal values of typed columns. views_to_panel_configs() turns an arch's views into
 the panel configs that load_panel_configs() reads from analysis_configs/.
 
-views/<arch>/ holds the views of one metric library arch, one file per panel. A panel's
+views/<arch>/ holds the views of one metric library arch, one file per panel, and
+BUILT_IN_VIEWS the panels every arch shows from the workload's CSV files. A panel's
 id comes from its file name (0300_memory_chart.yaml is panel 300), a table's id from its
 position in the panel (301 is the first table), and a row's numeric id (3.1.0) from its
 position in the table.
 
-Only tools use this module until the cutover; tools/validate_views.py checks the files.
+Until the cutover, analyze reads only the built-in top stats view (--list-stats) and
+tools read the rest; tools/validate_views.py checks the files.
 Standard library and the vendored YAML only: profile mode imports it.
 """
 
+import copy
 import re
 from collections import OrderedDict
 from pathlib import Path
@@ -32,7 +35,8 @@ from vendored import yaml
 # Table kinds, as the panel configs' data source keys; a table without "render" is a
 # metric table.
 METRIC_TABLE = "metric_table"
-RENDERS = (METRIC_TABLE, "raw_csv_table", "pc_sampling_table")
+RAW_CSV_TABLE = "raw_csv_table"
+RENDERS = (METRIC_TABLE, RAW_CSV_TABLE, "pc_sampling_table")
 # How the CLI draws a metric table (tty.py, memory_chart).
 CLI_STYLES = (
     "simple_box",
@@ -71,6 +75,40 @@ NO_VALUE = "None"
 EMPIRICAL_PEAK = "empirical"
 # A view file name: the panel id, then the view's name.
 VIEW_FILE_RE = re.compile(r"^(\d\d00)_[a-z0-9_]+\.yaml$")
+# The panel of the top kernels and dispatches, which --list-stats shows.
+TOP_STATS_PANEL_ID = 0
+# The views of every arch, by panel id: the top stats and the system info. They show
+# the workload's CSV files, not metrics.
+BUILT_IN_VIEWS: Dict[int, Dict[str, Any]] = {
+    TOP_STATS_PANEL_ID: {
+        "view": "Top Stats",
+        "alias": "topstats",
+        "tables": [
+            {
+                "render": RAW_CSV_TABLE,
+                "title": "Top Kernels",
+                "source": "pmc_kernel_top.csv",
+            },
+            {
+                "render": RAW_CSV_TABLE,
+                "title": "Dispatch List",
+                "source": "pmc_dispatch_info.csv",
+            },
+        ],
+    },
+    100: {
+        "view": "System Info",
+        "alias": "sysinfo",
+        "tables": [
+            {
+                "render": RAW_CSV_TABLE,
+                "title": "System Info",
+                "source": "sysinfo.csv",
+                "columnwise": True,
+            }
+        ],
+    },
+}
 
 
 def default_views_dir() -> Path:
@@ -99,11 +137,14 @@ def read_view_files(arch: str, views_dir: Optional[Path] = None) -> Dict[Path, A
 def load_views(
     arch: str, views_dir: Optional[Path] = None
 ) -> "OrderedDict[int, Dict[str, Any]]":
-    """Return arch's views, keyed by panel id, in panel id (file name) order."""
-    return OrderedDict(
+    """Return arch's views, the built-in ones and its files', keyed by panel id, in
+    panel id order."""
+    views = copy.deepcopy(BUILT_IN_VIEWS)
+    views.update(
         (view_panel_id(path.name), view)
         for path, view in read_view_files(arch, views_dir).items()
     )
+    return OrderedDict(sorted(views.items()))
 
 
 def view_panel_id(file_name: str) -> int:
@@ -351,7 +392,10 @@ def _file_name_errors(paths: List[str]) -> List[str]:
                 "e.g. 0300_memory_chart.yaml"
             )
             continue
-        paths_by_panel.setdefault(view_panel_id(name), []).append(path)
+        panel_id = view_panel_id(name)
+        if panel_id in BUILT_IN_VIEWS:
+            errors.append(f"[{path}] panel {panel_id} is a built-in view")
+        paths_by_panel.setdefault(panel_id, []).append(path)
     errors.extend(
         f"[{', '.join(panel_paths)}] panel {panel_id} has more than one view file"
         for panel_id, panel_paths in sorted(paths_by_panel.items())
