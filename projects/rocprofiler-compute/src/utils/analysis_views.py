@@ -29,7 +29,7 @@ from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import config
 from utils.equation_format import normalize_equation
-from utils.utils_common import canonical_config_arch
+from utils.utils_common import canonical_config_arch, mapping_field_errors
 from vendored import yaml
 
 # Table kinds, as the panel configs' data source keys; a table without "render" is a
@@ -407,7 +407,7 @@ def _file_name_errors(paths: List[str]) -> List[str]:
 def _view_shape_errors(document: object) -> List[str]:
     if not isinstance(document, dict):
         return ["a view must be a mapping"]
-    errors = _field_errors(document, VIEW_FIELDS, ("view", "tables"))
+    errors = mapping_field_errors(document, ("view", "tables"), VIEW_FIELDS)
     tables = document.get("tables")
     if not isinstance(tables, list):
         return [*errors, "'tables' must be a list"]
@@ -421,7 +421,7 @@ def _view_shape_errors(document: object) -> List[str]:
 def _table_shape_errors(table: object) -> List[str]:
     if not isinstance(table, dict):
         return ["a table must be a mapping"]
-    errors = _field_errors(table, TABLE_FIELDS, ("title",))
+    errors = mapping_field_errors(table, ("title",), TABLE_FIELDS)
     render = _render(table)
     if render not in RENDERS:
         errors.append(f"render {render!r} is not one of {RENDERS}")
@@ -452,7 +452,7 @@ def _metric_table_shape_errors(table: Dict[str, Any]) -> List[str]:
 def _row_shape_errors(row: object, columns: List[str]) -> List[str]:
     if not isinstance(row, dict):
         return ["a row must be a mapping"]
-    errors = _field_errors(row, ROW_FIELDS, ())
+    errors = mapping_field_errors(row, (), ROW_FIELDS)
     if ("metric" in row) == ("metrics" in row):
         errors.append("needs one of 'metric' and 'metrics'")
     elif "metrics" in row and "label" not in row:
@@ -464,16 +464,6 @@ def _row_shape_errors(row: object, columns: List[str]) -> List[str]:
         for field in ("metrics", "values")
         for column in row.get(field, {})
         if column not in columns
-    )
-    return errors
-
-
-def _field_errors(
-    item: Dict[str, Any], known: Tuple[str, ...], required: Tuple[str, ...]
-) -> List[str]:
-    errors = [f"'{field}' is required" for field in required if field not in item]
-    errors.extend(
-        f"'{field}' is not a known field" for field in item if field not in known
     )
     return errors
 
