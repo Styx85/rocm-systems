@@ -1,9 +1,7 @@
 view: GL2 Cache (L2)
-legacy_panel_id: 1300
 alias: gl2
 tables:
-- id: 1301
-  title: GL2 Cache Performance
+- title: GL2 Cache Performance
   header:
     metric: Metric
     avg: Avg
@@ -14,8 +12,7 @@ tables:
   - metric: gl2.hit_rate
   - metric: gl2.hits
   - metric: gl2.misses
-- id: 1302
-  title: GL2 Cache Request Statistics
+- title: GL2 Cache Request Statistics
   header:
     metric: Metric
     avg: Avg
@@ -33,8 +30,7 @@ tables:
     label: Atomic Requests
   - metric: gl2.ea_rd_req_dram
   - metric: gl2.ea_wr_req_dram
-- id: 1303
-  title: GL2 Cache Bandwidth
+- title: GL2 Cache Bandwidth
   header:
     metric: Metric
     avg: Avg

@@ -1,9 +1,7 @@
 view: GLARB (Graphics Level Arbiter)
-legacy_panel_id: 1200
 alias: glarb
 tables:
-- id: 1201
-  title: GLARBA Processing
+- title: GLARBA Processing
   header:
     metric: Metric
     avg: Avg
@@ -17,8 +15,7 @@ tables:
   - metric: glarb.glarba_return_bus_util
   - metric: glarb.glarba_req
   - metric: glarb.glarba_req_lat
-- id: 1202
-  title: GLARBC Utilization
+- title: GLARBC Utilization
   header:
     metric: Metric
     avg: Avg
@@ -30,8 +27,7 @@ tables:
     label: Utilization
   - metric: glarb.glarbc_return_arbitration_lat
   - metric: glarb.glarbc_buffer_full_stall
-- id: 1203
-  title: GLARBC Request
+- title: GLARBC Request
   header:
     metric: Metric
     avg: Avg
@@ -45,8 +41,7 @@ tables:
   - metric: glarb.glarbc_req_atomic_with_return
   - metric: glarb.glarbc_req_atomic_without_return
     label: GLARBC Requests - Atomic without Return
-- id: 1204
-  title: GLARBC Request Bandwidth
+- title: GLARBC Request Bandwidth
   header:
     metric: Metric
     avg: Avg
@@ -57,8 +52,7 @@ tables:
   - metric: glarb.glarbc_req_bw_rd
   - metric: glarb.glarbc_req_bw_wr
   - metric: glarb.glarbc_client_wr_acks
-- id: 1205
-  title: GLARBC-GL2 Interface
+- title: GLARBC-GL2 Interface
   header:
     metric: Metric
     avg: Avg

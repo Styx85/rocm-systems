@@ -1,9 +1,7 @@
 view: Efficiency Arbiter (EA)
-legacy_panel_id: 1400
 alias: ea
 tables:
-- id: 1401
-  title: EA Utilization
+- title: EA Utilization
   header:
     metric: Metric
     avg: Avg
@@ -13,8 +11,7 @@ tables:
   metrics:
   - metric: ea.util
     label: Utilization
-- id: 1402
-  title: EA Traffic Bandwidth
+- title: EA Traffic Bandwidth
   header:
     metric: Metric
     avg: Avg
@@ -30,8 +27,7 @@ tables:
   - metric: ea.hdm_bw_wr
   - metric: ea.gmi_bw_rd
   - metric: ea.gmi_bw_wr
-- id: 1403
-  title: EA-SDP Interface - Outstanding Requests
+- title: EA-SDP Interface - Outstanding Requests
   header:
     metric: Metric
     avg: Avg
@@ -61,8 +57,7 @@ tables:
     label: Outstanding Requests - Probe Request
   - metric: ea.outstanding_req_probe_response
     label: Outstanding Requests - Probe Response
-- id: 1404
-  title: EA-SDP Interface - Stalls
+- title: EA-SDP Interface - Stalls
   header:
     metric: Metric
     avg: Avg

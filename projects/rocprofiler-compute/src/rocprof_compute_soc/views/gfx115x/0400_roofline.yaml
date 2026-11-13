@@ -1,9 +1,7 @@
 view: Roofline
-legacy_panel_id: 400
 alias: roof
 tables:
-- id: 401
-  title: Roofline Performance Rates
+- title: Roofline Performance Rates
   cli_style: Roofline
   header:
     metric: Metric
@@ -27,8 +25,7 @@ tables:
   - metric: lds.theoretical_bw
     label: LDS BW
     peak: empirical
-- id: 402
-  title: Roofline Plot Points
+- title: Roofline Plot Points
   cli_style: Roofline
   header:
     metric: Metric

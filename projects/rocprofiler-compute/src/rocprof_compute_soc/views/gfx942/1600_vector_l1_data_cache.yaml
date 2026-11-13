@@ -1,9 +1,7 @@
 view: Vector L1 Data Cache
-legacy_panel_id: 1600
 alias: vl1d
 tables:
-- id: 1601
-  title: vL1D Speed-of-Light
+- title: vL1D Speed-of-Light
   cli_style: simple_bar
   header:
     metric: Metric
@@ -18,8 +16,7 @@ tables:
     label: Utilization
   - metric: vl1d.coalescing
     label: Coalescing
-- id: 1602
-  title: vL1D cache stall metrics
+- title: vL1D cache stall metrics
   cli_style: simple_box
   header:
     metric: Metric
@@ -35,8 +32,7 @@ tables:
     label: Tag RAM Stall (Write)
   - metric: vl1d.tag_ram_stall_atomic
     label: Tag RAM Stall (Atomic)
-- id: 1603
-  title: vL1D cache access metrics
+- title: vL1D cache access metrics
   header:
     metric: Metric
     avg: Avg
@@ -70,8 +66,7 @@ tables:
     label: L1-L2 Write
   - metric: vl1d.l2_atomic_req
     label: L1-L2 Atomic
-- id: 1604
-  title: L1D - L2 Transactions
+- title: L1D - L2 Transactions
   header:
     metric: Metric
     xfer: Xfer
@@ -141,8 +136,7 @@ tables:
     values:
       xfer: Atomic
       coherency: RW
-- id: 1605
-  title: L1 Unified Translation Cache (UTCL1)
+- title: L1 Unified Translation Cache (UTCL1)
   header:
     metric: Metric
     avg: Avg
@@ -160,8 +154,7 @@ tables:
     label: Translation Misses
   - metric: vl1d.permission_misses
     label: Permission Misses
-- id: 1606
-  title: L1D Addr Translation Stalls
+- title: L1D Addr Translation Stalls
   header:
     metric: Metric
     avg: Avg

@@ -1,9 +1,7 @@
 view: CPC (Command Processor - Compute)
-legacy_panel_id: 500
 alias: cpc
 tables:
-- id: 501
-  title: CPC Utilizations
+- title: CPC Utilizations
   header:
     metric: Metric
     avg: Avg

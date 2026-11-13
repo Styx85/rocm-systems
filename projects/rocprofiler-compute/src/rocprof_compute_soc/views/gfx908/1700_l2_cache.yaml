@@ -1,9 +1,7 @@
 view: L2 Cache
-legacy_panel_id: 1700
 alias: l2
 tables:
-- id: 1701
-  title: L2 Speed-of-Light
+- title: L2 Speed-of-Light
   header:
     metric: Metric
     value: Avg
@@ -21,8 +19,7 @@ tables:
     label: L2-Fabric Write and Atomic BW
   - metric: fabric.hbm_peak_bw
     label: HBM Bandwidth
-- id: 1702
-  title: L2-Fabric interface metrics
+- title: L2-Fabric interface metrics
   header:
     metric: Metric
     avg: Avg
@@ -52,8 +49,7 @@ tables:
     label: Write and Atomic Latency
   - metric: fabric.atomic_lat
     label: Atomic Latency
-- id: 1703
-  title: L2 Cache Accesses
+- title: L2 Cache Accesses
   header:
     metric: Metric
     avg: Avg
@@ -99,8 +95,7 @@ tables:
     label: CC Req
   - metric: l2.rw_req
     label: RW Req
-- id: 1704
-  title: L2 Cache Stalls
+- title: L2 Cache Stalls
   header:
     metric: Metric
     avg: Avg
@@ -108,8 +103,7 @@ tables:
     max: Max
     unit: Unit
   metrics: []
-- id: 1705
-  title: L2 - Fabric Interface stalls
+- title: L2 - Fabric Interface stalls
   header:
     metric: Metric
     type: Type
@@ -124,8 +118,7 @@ tables:
     values:
       type: Credit Starvation
       transaction: Write
-- id: 1706
-  title: L2 - Fabric interface detailed metrics
+- title: L2 - Fabric interface detailed metrics
   header:
     metric: Metric
     avg: Avg

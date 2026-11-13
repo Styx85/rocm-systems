@@ -33,17 +33,14 @@ ISSUED = (
 # A view with one mistake of each kind the shape check reports.
 BROKEN_VIEW = {
     "view": "Compute Units - Compute Pipeline",
-    "legacy_panel_id": "1100",
     "archs": ["gfx942"],
     "tables": [
         {
-            "id": 1101,
             "title": "Compute Speed-of-Light",
             "render": "chart",
             "cli_style": "pie",
         },
         {
-            "id": 1102,
             "title": "Pipeline Statistics",
             "header": {"metric": "Metric", "avg": "Avg", "unit": "Unit"},
             "metrics": [
@@ -108,26 +105,32 @@ def test_panel_descriptions_come_from_the_library():
 
 
 def test_view_schema_errors():
-    errors = view_schema_errors({"gfx942/1100.yaml": BROKEN_VIEW})
+    """A broken view, a second view of its panel, and a file name without a panel id."""
+    source = "gfx942/1100_compute_pipeline.yaml"
+    errors = view_schema_errors({
+        source: BROKEN_VIEW,
+        "gfx942/1100_copy.yaml": {"view": "Copy", "tables": []},
+        "gfx942/compute.yaml": {"view": "Compute", "tables": []},
+    })
     assert errors == [
-        "[gfx942/1100.yaml] 'archs' is not a known field",
-        "[gfx942/1100.yaml] 'legacy_panel_id' must be an integer",
-        "[gfx942/1100.yaml] table 1101: render 'chart' is not one of "
+        "[gfx942/compute.yaml] the file name must be the panel id and the view name, "
+        "e.g. 0300_memory_chart.yaml",
+        f"[{source}, gfx942/1100_copy.yaml] panel 1100 has more than one view file",
+        f"[{source}] 'archs' is not a known field",
+        f"[{source}] table 1: render 'chart' is not one of "
         "('metric_table', 'raw_csv_table', 'pc_sampling_table')",
-        "[gfx942/1100.yaml] table 1101: cli_style 'pie' is not one of "
+        f"[{source}] table 1: cli_style 'pie' is not one of "
         "('simple_box', 'simple_bar', 'simple_multiple_bar', 'mem_chart', 'Roofline')",
-        "[gfx942/1100.yaml] table 1102: row 0: needs one of 'metric' and 'metrics'",
-        "[gfx942/1100.yaml] table 1102: row 1: needs a 'label' when it has 'metrics'",
-        "[gfx942/1100.yaml] table 1102: row 2: 'values' names 'xfer', which is not a "
-        "column",
-        "[gfx942/1100.yaml] table 1102: row 3: 'peak' may only be 'empirical'",
-        "[gfx942/1100.yaml] table 1102: row 4: 'unit' is not a known field",
+        f"[{source}] table 2: row 0: needs one of 'metric' and 'metrics'",
+        f"[{source}] table 2: row 1: needs a 'label' when it has 'metrics'",
+        f"[{source}] table 2: row 2: 'values' names 'xfer', which is not a column",
+        f"[{source}] table 2: row 3: 'peak' may only be 'empirical'",
+        f"[{source}] table 2: row 4: 'unit' is not a known field",
     ]
 
 
 def test_view_metric_errors():
-    """The shipped gfx942 views, with a metric and a measured peak the library lacks,
-    and a panel shown twice."""
+    """The shipped gfx942 views, with a metric and a measured peak the library lacks."""
     views = load_views(ARCH)
     metrics = loader.MetricLibrary.load(
         loader.default_metric_library_dir(), ARCH
@@ -137,9 +140,7 @@ def test_view_metric_errors():
     rows = dict(iter_view_rows(broken))
     rows["11.2.0"]["metric"] = "compute.made_up"
     rows["2.1.11"]["peak"] = "empirical"
-    broken.append(copy.deepcopy(broken[0]))
     assert view_metric_errors(broken, metrics) == [
-        "panel 0 has more than one view",
         "2.1.11 compute.branch_util has no 'peak_empirical'",
         "11.2.0 compute.made_up: not a metric of the arch's library",
     ]

@@ -1,9 +1,7 @@
 view: Central Hub (CH)
-legacy_panel_id: 1500
 alias: ch
 tables:
-- id: 1501
-  title: CHA Utilization
+- title: CHA Utilization
   header:
     metric: Metric
     avg: Avg
@@ -13,8 +11,7 @@ tables:
   metrics:
   - metric: ch.cha_util
     label: Utilization
-- id: 1502
-  title: CHA Arbitration
+- title: CHA Arbitration
   header:
     metric: Metric
     avg: Avg
@@ -28,8 +25,7 @@ tables:
   - metric: ch.cha_chc1_req_stall_rate
   - metric: ch.cha_req_path_util
   - metric: ch.cha_return_path_util
-- id: 1503
-  title: CHC Utilization
+- title: CHC Utilization
   header:
     metric: Metric
     avg: Avg
@@ -41,8 +37,7 @@ tables:
     label: Utilization
   - metric: ch.buffer_stall_rate
     label: Buffer Stall Rate
-- id: 1504
-  title: CHC Requests
+- title: CHC Requests
   header:
     metric: Metric
     avg: Avg
@@ -76,8 +71,7 @@ tables:
     label: Total Requests - Atomic with Return
   - metric: ch.total_req_atomic_without_return
     label: Total Requests - Atomic without Return
-- id: 1505
-  title: CHC Bandwidth and Latency
+- title: CHC Bandwidth and Latency
   header:
     metric: Metric
     avg: Avg

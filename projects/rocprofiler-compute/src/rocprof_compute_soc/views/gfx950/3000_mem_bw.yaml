@@ -1,9 +1,7 @@
 view: Memory Bandwidth Analysis
-legacy_panel_id: 3000
 alias: membw_analysis
 tables:
-- id: 3001
-  title: L1 Cache
+- title: L1 Cache
   header:
     metric: Metric
     value: Avg
@@ -21,8 +19,7 @@ tables:
     label: L1 Cache - TCP stalled by TD
   - metric: vl1d.cache_tcp_stalled_by_l2
     label: L1 Cache - TCP stalled by L2
-- id: 3002
-  title: L2 Bottleneck Detection Indicators
+- title: L2 Bottleneck Detection Indicators
   header:
     metric: Metric
     value: Avg
@@ -43,8 +40,7 @@ tables:
   - metric: l2.hit_rate
     label: L2 Cache Efficiency
   - metric: fabric.remote_access_pressure_gmi
-- id: 3003
-  title: EA Bottleneck Detection Indicators
+- title: EA Bottleneck Detection Indicators
   header:
     metric: Metric
     value: Avg

@@ -1,9 +1,7 @@
 view: Compute Units - Instruction Mix
-legacy_panel_id: 1000
 alias: cu_ins
 tables:
-- id: 1001
-  title: Overall Instruction Mix
+- title: Overall Instruction Mix
   header:
     metric: Metric
     avg: Avg
@@ -25,8 +23,7 @@ tables:
     label: SMEM
   - metric: compute.inst_mix_branch
     label: Branch
-- id: 1002
-  title: VALU Arithmetic Instruction Mix
+- title: VALU Arithmetic Instruction Mix
   header:
     metric: Metric
     avg: Avg
@@ -64,8 +61,7 @@ tables:
     label: F64-Trans
   - metric: compute.inst_mix_conversion
     label: Conversion
-- id: 1003
-  title: VMEM Instruction Mix
+- title: VMEM Instruction Mix
   header:
     metric: Metric
     avg: Avg
@@ -89,8 +85,7 @@ tables:
     label: Spill/Stack Write
   - metric: ta.spill_atomic_insts
     label: Spill/Stack Atomic
-- id: 1004
-  title: MFMA Arithmetic Instruction Mix
+- title: MFMA Arithmetic Instruction Mix
   header:
     metric: Metric
     avg: Avg

@@ -1,9 +1,7 @@
 view: GL0 Texture Data (TXD)
-legacy_panel_id: 1000
 alias: txd
 tables:
-- id: 1001
-  title: TXD Utilization
+- title: TXD Utilization
   header:
     metric: Metric
     avg: Avg

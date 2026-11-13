@@ -1,9 +1,7 @@
 view: Compute Units - Compute Pipeline
-legacy_panel_id: 1100
 alias: cu_pipe
 tables:
-- id: 1101
-  title: Compute Speed-of-Light
+- title: Compute Speed-of-Light
   header:
     metric: Metric
     value: Avg
@@ -20,8 +18,7 @@ tables:
   - metric: compute.mfma_flops_f64
   - metric: compute.mfma_flops_f6f4
   - metric: compute.mfma_iops_int8
-- id: 1102
-  title: Pipeline Statistics
+- title: Pipeline Statistics
   header:
     metric: Metric
     avg: Avg
@@ -43,8 +40,7 @@ tables:
   - metric: compute.mfma_inst_cycles
   - metric: compute.vmem_lat
   - metric: compute.smem_lat
-- id: 1103
-  title: Arithmetic Operations
+- title: Arithmetic Operations
   header:
     metric: Metric
     avg: Avg

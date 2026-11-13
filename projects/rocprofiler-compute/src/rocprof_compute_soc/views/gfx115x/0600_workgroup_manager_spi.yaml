@@ -1,9 +1,7 @@
 view: Workgroup Manager (SPI)
-legacy_panel_id: 600
 alias: spi
 tables:
-- id: 601
-  title: SPI Utilization
+- title: SPI Utilization
   header:
     metric: Metric
     avg: Avg
@@ -13,8 +11,7 @@ tables:
   metrics:
   - metric: spi.workgroup_manager_util
     label: SPI Busy
-- id: 602
-  title: Wave Dispatch Statistics
+- title: Wave Dispatch Statistics
   header:
     metric: Metric
     avg: Avg

@@ -1,9 +1,7 @@
 view: Command Processor Compute (CPC)
-legacy_panel_id: 500
 alias: cpc
 tables:
-- id: 501
-  title: CPC Utilization
+- title: CPC Utilization
   header:
     metric: Metric
     avg: Avg
@@ -14,8 +12,7 @@ tables:
   - metric: cp.cpc_busy
   - metric: cp.cpc_idle
   - metric: cp.cpc_stalled
-- id: 502
-  title: CPC Interface Utilization
+- title: CPC Interface Utilization
   header:
     metric: Metric
     avg: Avg
@@ -26,8 +23,7 @@ tables:
   - metric: cp.tciu_busy
   - metric: cp.utcl2_busy
   - metric: cp.gcriu_busy
-- id: 503
-  title: MEC Stall Cycles
+- title: MEC Stall Cycles
   header:
     metric: Metric
     avg: Avg
@@ -39,8 +35,7 @@ tables:
   - metric: cp.me1_stall_on_memory_rd
   - metric: cp.me1_stall_on_memory_wr
   - metric: cp.me1_stall_on_roq_data
-- id: 504
-  title: CPC Memory Requests
+- title: CPC Memory Requests
   header:
     metric: Metric
     avg: Avg
@@ -52,8 +47,7 @@ tables:
   - metric: cp.tciu_wr_req
   - metric: cp.gus_rd_req
   - metric: cp.gus_wr_req
-- id: 505
-  title: MEC Instruction Cache
+- title: MEC Instruction Cache
   header:
     metric: Metric
     avg: Avg

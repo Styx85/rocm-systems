@@ -6,8 +6,8 @@
 
 For every arch in METRIC_LIBRARY_PARENT_ARCH, check that:
 
-- its view files have known fields, render types and CLI styles, and the views tree
-  holds only metric library arch directories;
+- its view files are named by panel id, one per panel, have known fields, render
+  types and CLI styles, and the views tree holds only metric library arch directories;
 - every metric a view shows is in the arch's metric library, with a measured peak where
   the row asks for one.
 
@@ -25,6 +25,7 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 from rocprof_compute_soc.metric_library import loader
 from utils.analysis_views import (
     default_views_dir,
+    load_views,
     read_view_files,
     view_metric_errors,
     view_schema_errors,
@@ -50,7 +51,7 @@ def validate(views_dir: Path, metric_dir: Path) -> List[str]:
         metrics = loader.MetricLibrary.load(metric_dir, arch).metrics
         errors.extend(
             f"[{arch}] {error}"
-            for error in view_metric_errors(list(documents.values()), metrics)
+            for error in view_metric_errors(load_views(arch, views_dir), metrics)
         )
     return errors
 

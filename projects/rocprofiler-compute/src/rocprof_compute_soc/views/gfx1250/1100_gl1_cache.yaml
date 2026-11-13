@@ -1,9 +1,7 @@
 view: GL1 Cache
-legacy_panel_id: 1100
 alias: gl1
 tables:
-- id: 1101
-  title: GL1A Processing
+- title: GL1A Processing
   header:
     metric: Metric
     avg: Avg
@@ -16,8 +14,7 @@ tables:
   - metric: gl1.gl1a_return_bus_util
   - metric: gl1.gl1a_req
   - metric: gl1.gl1a_req_lat
-- id: 1102
-  title: GL1C Utilization
+- title: GL1C Utilization
   header:
     metric: Metric
     avg: Avg
@@ -29,8 +26,7 @@ tables:
     label: GL1C Utilization
   - metric: gl1.gl1c_return_arbitration_lat
   - metric: gl1.gl1c_buffer_full_stall
-- id: 1103
-  title: GL1C Request
+- title: GL1C Request
   header:
     metric: Metric
     avg: Avg
@@ -47,8 +43,7 @@ tables:
   - metric: gl1.gl1c_req_atomic_with_return
   - metric: gl1.gl1c_req_atomic_without_return
     label: GL1C Requests - Atomic without Return
-- id: 1104
-  title: GL1C Request Bandwidth
+- title: GL1C Request Bandwidth
   header:
     metric: Metric
     avg: Avg
@@ -58,8 +53,7 @@ tables:
   metrics:
   - metric: gl1.gl1c_req_bw_rd
   - metric: gl1.gl1c_req_bw_wr
-- id: 1105
-  title: GL1C Multicast
+- title: GL1C Multicast
   header:
     metric: Metric
     avg: Avg
@@ -76,8 +70,7 @@ tables:
   - metric: gl1.gl1c_multicast_tracker_2_timeout_rate
   - metric: gl1.gl1c_multicast_tracker_3_timeout_rate
   - metric: gl1.gl1c_multicast_to_unicast_downgrade_rate
-- id: 1106
-  title: GL1C-GLARB Interface
+- title: GL1C-GLARB Interface
   header:
     metric: Metric
     avg: Avg

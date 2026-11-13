@@ -10,13 +10,16 @@ the metric's name, rounding, the measured peak instead of the theoretical one, a
 literal values of typed columns. views_to_panel_configs() turns an arch's views into
 the panel configs that load_panel_configs() reads from analysis_configs/.
 
-views/<arch>/ holds the views of one metric library arch. A row's numeric id (11.2.3)
-is its position in the views.
+views/<arch>/ holds the views of one metric library arch, one file per panel. A panel's
+id comes from its file name (0300_memory_chart.yaml is panel 300), a table's id from its
+position in the panel (301 is the first table), and a row's numeric id (3.1.0) from its
+position in the table.
 
 Only tools use this module until the cutover; tools/validate_views.py checks the files.
 Standard library and the vendored YAML only: profile mode imports it.
 """
 
+import re
 from collections import OrderedDict
 from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
@@ -42,10 +45,9 @@ CLI_STYLES = (
 MAIN_COLUMNS = ("avg", "value", "expr")
 # Columns that aggregate the main formula over kernels, with the function they apply.
 AGGREGATE_COLUMNS = {"min": "MIN", "max": "MAX", "std dev": "STD"}
-VIEW_FIELDS = ("view", "legacy_panel_id", "alias", "tables")
+VIEW_FIELDS = ("view", "alias", "tables")
 TABLE_FIELDS = (
     "render",
-    "id",
     "title",
     "header",
     "cli_style",
@@ -67,6 +69,8 @@ ROW_FIELDS = (
 NO_VALUE = "None"
 # A row's "peak" that shows its metric's measured peak instead of the theoretical one.
 EMPIRICAL_PEAK = "empirical"
+# A view file name: the panel id, then the view's name.
+VIEW_FILE_RE = re.compile(r"^(\d\d00)_[a-z0-9_]+\.yaml$")
 
 
 def default_views_dir() -> Path:
@@ -92,42 +96,60 @@ def read_view_files(arch: str, views_dir: Optional[Path] = None) -> Dict[Path, A
     return documents
 
 
-def load_views(arch: str, views_dir: Optional[Path] = None) -> List[Dict[str, Any]]:
-    """Return arch's views, in file name order."""
-    return list(read_view_files(arch, views_dir).values())
+def load_views(
+    arch: str, views_dir: Optional[Path] = None
+) -> "OrderedDict[int, Dict[str, Any]]":
+    """Return arch's views, keyed by panel id, in panel id (file name) order."""
+    return OrderedDict(
+        (view_panel_id(path.name), view)
+        for path, view in read_view_files(arch, views_dir).items()
+    )
+
+
+def view_panel_id(file_name: str) -> int:
+    """Return the panel id of a view file name, e.g. 300 for 0300_memory_chart.yaml."""
+    match = VIEW_FILE_RE.match(file_name)
+    if match is None:
+        raise ValueError(f"{file_name}: not a view file name")
+    return int(match.group(1))
 
 
 def views_to_panel_configs(
-    views: List[Dict[str, Any]], metrics: Dict[str, Dict[str, Any]]
+    views: Dict[int, Dict[str, Any]], metrics: Dict[str, Dict[str, Any]]
 ) -> "OrderedDict[int, Dict[str, Any]]":
     """Return the panel configs of an arch's views, as load_panel_configs() does.
 
     Args:
-        views: One arch's views (load_views()).
+        views: One arch's views by panel id (load_views()).
         metrics: The arch's metric library metrics (MetricLibrary.metrics).
 
     Returns:
         Each view's panel config, keyed by panel id, in panel id order.
     """
-    configs = {view["legacy_panel_id"]: _panel_config(view, metrics) for view in views}
-    return OrderedDict(sorted(configs.items()))
+    return OrderedDict(
+        (panel_id, _panel_config(panel_id, views[panel_id], metrics))
+        for panel_id in sorted(views)
+    )
 
 
-def panel_aliases(views: List[Dict[str, Any]]) -> Dict[str, str]:
+def panel_aliases(views: Dict[int, Dict[str, Any]]) -> Dict[str, str]:
     """Return panel number -> -b alias, "" for none (get_arch_panel_id_to_alias())."""
     return {
-        str(view["legacy_panel_id"] // 100): view.get("alias") or "" for view in views
+        str(panel_id // 100): view.get("alias") or ""
+        for panel_id, view in views.items()
     }
 
 
-def iter_view_rows(views: List[Dict[str, Any]]) -> Iterator[Tuple[str, Dict[str, Any]]]:
+def iter_view_rows(
+    views: Dict[int, Dict[str, Any]],
+) -> Iterator[Tuple[str, Dict[str, Any]]]:
     """Yield each metric table row of an arch's views with its numeric id."""
-    for view in views:
-        for table in view["tables"]:
+    for panel_id, view in views.items():
+        for table_id, table in _numbered_tables(panel_id, view):
             if _render(table) != METRIC_TABLE:
                 continue
             for index, row in enumerate(table["metrics"]):
-                yield f"{table['id'] // 100}.{table['id'] % 100}.{index}", row
+                yield f"{table_id // 100}.{table_id % 100}.{index}", row
 
 
 def row_metric_ids(row: Dict[str, Any]) -> List[str]:
@@ -145,32 +167,27 @@ def row_label(row: Dict[str, Any], metrics: Dict[str, Dict[str, Any]]) -> str:
 
 
 def view_schema_errors(documents: Dict[str, Any]) -> List[str]:
-    """Return what is wrong with the shape of view documents, keyed by source name.
+    """Return what is wrong with the shape of one arch's view documents, keyed by file
+    path.
 
-    Checks the fields each level may have, render types and CLI styles, that a row
-    names its metric or its columns' metrics, and that a row with columns' metrics
-    has a label.
+    Checks the file names and that each panel id has one file, the fields each level
+    may have, render types and CLI styles, that a row names its metric or its columns'
+    metrics, and that a row with columns' metrics has a label.
     """
-    errors = []
+    errors = _file_name_errors(list(documents))
     for source, document in documents.items():
         errors.extend(f"[{source}] {error}" for error in _view_shape_errors(document))
     return errors
 
 
 def view_metric_errors(
-    views: List[Dict[str, Any]], metrics: Dict[str, Dict[str, Any]]
+    views: Dict[int, Dict[str, Any]], metrics: Dict[str, Dict[str, Any]]
 ) -> List[str]:
     """Return what in an arch's views the arch's metric library cannot show.
 
-    Checks that panel ids are unique, every metric id exists, and a measured peak
-    exists.
+    Checks that every metric id exists, and a measured peak exists.
     """
     errors = []
-    panel_ids = [view["legacy_panel_id"] for view in views]
-    errors.extend(
-        f"panel {panel_id} has more than one view"
-        for panel_id in sorted({pid for pid in panel_ids if panel_ids.count(pid) > 1})
-    )
     for position, row in iter_view_rows(views):
         errors.extend(
             f"{position} {error}" for error in _row_metric_errors(row, metrics)
@@ -187,24 +204,34 @@ def _render(table: Dict[str, Any]) -> str:
     return table.get("render", METRIC_TABLE)
 
 
+def _numbered_tables(
+    panel_id: int, view: Dict[str, Any]
+) -> Iterator[Tuple[int, Dict[str, Any]]]:
+    """Yield each table of a view with its table id: the panel id plus its position."""
+    for index, table in enumerate(view["tables"]):
+        yield panel_id + index + 1, table
+
+
 def _panel_config(
-    view: Dict[str, Any], metrics: Dict[str, Dict[str, Any]]
+    panel_id: int, view: Dict[str, Any], metrics: Dict[str, Dict[str, Any]]
 ) -> Dict[str, Any]:
     return {
-        "id": view["legacy_panel_id"],
+        "id": panel_id,
         "title": view["view"],
         "data source": [
-            {_render(table): _table_config(table, metrics)} for table in view["tables"]
+            {_render(table): _table_config(table_id, table, metrics)}
+            for table_id, table in _numbered_tables(panel_id, view)
         ],
         "metrics_description": _panel_descriptions(view, metrics),
     }
 
 
 def _table_config(
-    table: Dict[str, Any], metrics: Dict[str, Dict[str, Any]]
+    table_id: int, table: Dict[str, Any], metrics: Dict[str, Dict[str, Any]]
 ) -> Dict[str, Any]:
-    config_keys = ("id", "title", "header", "source", "columnwise", "cli_style")
-    table_config = {key: table[key] for key in config_keys if key in table}
+    config_keys = ("title", "header", "source", "columnwise", "cli_style")
+    table_config = {"id": table_id}
+    table_config.update({key: table[key] for key in config_keys if key in table})
     if "metrics" not in table:
         return table_config
     columns = [column for column in table["header"] if column != "metric"]
@@ -312,25 +339,45 @@ def _panel_descriptions(
 # ---------------------------------------------------------------------------
 
 
+def _file_name_errors(paths: List[str]) -> List[str]:
+    """Report a view file name without a panel id, and a panel id with two files."""
+    errors = []
+    paths_by_panel: Dict[int, List[str]] = {}
+    for path in paths:
+        name = Path(path).name
+        if not VIEW_FILE_RE.match(name):
+            errors.append(
+                f"[{path}] the file name must be the panel id and the view name, "
+                "e.g. 0300_memory_chart.yaml"
+            )
+            continue
+        paths_by_panel.setdefault(view_panel_id(name), []).append(path)
+    errors.extend(
+        f"[{', '.join(panel_paths)}] panel {panel_id} has more than one view file"
+        for panel_id, panel_paths in sorted(paths_by_panel.items())
+        if len(panel_paths) > 1
+    )
+    return errors
+
+
 def _view_shape_errors(document: object) -> List[str]:
     if not isinstance(document, dict):
         return ["a view must be a mapping"]
-    errors = _field_errors(document, VIEW_FIELDS, ("view", "legacy_panel_id", "tables"))
-    if not isinstance(document.get("legacy_panel_id", 0), int):
-        errors.append("'legacy_panel_id' must be an integer")
+    errors = _field_errors(document, VIEW_FIELDS, ("view", "tables"))
     tables = document.get("tables")
     if not isinstance(tables, list):
         return [*errors, "'tables' must be a list"]
-    for table in tables:
-        errors.extend(_table_shape_errors(table))
+    for position, table in enumerate(tables, start=1):
+        errors.extend(
+            f"table {position}: {error}" for error in _table_shape_errors(table)
+        )
     return errors
 
 
 def _table_shape_errors(table: object) -> List[str]:
     if not isinstance(table, dict):
         return ["a table must be a mapping"]
-    where = f"table {table.get('id')}"
-    errors = _field_errors(table, TABLE_FIELDS, ("id", "title"))
+    errors = _field_errors(table, TABLE_FIELDS, ("title",))
     render = _render(table)
     if render not in RENDERS:
         errors.append(f"render {render!r} is not one of {RENDERS}")
@@ -340,7 +387,7 @@ def _table_shape_errors(table: object) -> List[str]:
         errors.extend(_metric_table_shape_errors(table))
     elif "metrics" in table or "header" in table:
         errors.append(f"a {render} has no header or metrics")
-    return [f"{where}: {error}" for error in errors]
+    return errors
 
 
 def _metric_table_shape_errors(table: Dict[str, Any]) -> List[str]:

@@ -5,7 +5,8 @@
 
 Until the cutover, each view is one analysis config panel:
 
-- the same panels, tables, headers and table settings, in order;
+- the same panels, tables, headers and table settings, in order (table ids are
+  positions in the views, so they are not compared);
 - the same rows in order, leaving out only rows that show no equation (and tables left
   empty by them);
 - each panel's -b alias is the config template's;
@@ -27,7 +28,6 @@ from rocprof_compute_soc.metric_library import loader
 from utils.analysis_views import (
     METRIC_TABLE,
     NO_VALUE,
-    iter_view_rows,
     load_views,
     panel_aliases,
     row_label,
@@ -36,13 +36,13 @@ from utils.analysis_views import (
 from utils.utils_common import get_arch_panel_id_to_alias, load_panel_configs
 
 # Table settings that must match the panel's; rows are compared by name.
-TABLE_KEYS = ("id", "title", "header", "cli_style", "source", "columnwise")
+TABLE_KEYS = ("title", "header", "cli_style", "source", "columnwise")
 # Row columns that show no equation.
 NON_EQUATION_COLUMNS = ("unit", "peak", "pct_of_peak")
 
 
 def structure_errors(
-    views: List[Dict[str, Any]],
+    views: Dict[int, Dict[str, Any]],
     metrics: Dict[str, Dict[str, Any]],
     arch: str,
 ) -> List[str]:
@@ -75,9 +75,7 @@ def _panel_errors(expected: Dict[str, Any], actual: Dict[str, Any]) -> List[str]
         if not _left_out_table(*_table(source))
     ]
     kinds = [list(source) for source in kept]
-    if kinds != [list(source) for source in actual["data source"]] or [
-        _table(source)[1]["id"] for source in kept
-    ] != [_table(source)[1]["id"] for source in actual["data source"]]:
+    if kinds != [list(source) for source in actual["data source"]]:
         return ["tables differ from the analysis configs' tables with rows"]
     errors = []
     for want, got in zip(kept, actual["data source"]):
@@ -127,7 +125,7 @@ def _shows_equation(row: Dict[str, Any]) -> bool:
     )
 
 
-def _alias_errors(views: List[Dict[str, Any]], arch: str) -> List[str]:
+def _alias_errors(views: Dict[int, Dict[str, Any]], arch: str) -> List[str]:
     template_aliases = get_arch_panel_id_to_alias(arch)
     return [
         f"panel {panel_number}: -b alias {alias!r}, config template has "
@@ -138,54 +136,59 @@ def _alias_errors(views: List[Dict[str, Any]], arch: str) -> List[str]:
 
 
 def _row_errors(
-    views: List[Dict[str, Any]],
+    views: Dict[int, Dict[str, Any]],
     metrics: Dict[str, Dict[str, Any]],
-    panel_rows: Set[Tuple[str, str]],
+    panel_rows: Set[Tuple[int, str, str]],
 ) -> List[str]:
-    """Check that each row is a row of the same panel table (panel_rows:
-    _panel_rows())."""
+    """Check that each row is a row of a panel table with the same title (panel_rows:
+    _panel_rows()). This also covers the panels the structure check skips."""
     errors = []
-    for position, row in iter_view_rows(views):
-        table = position.rsplit(".", 1)[0]
-        name = row_label(row, metrics)
-        if (table, name) not in panel_rows:
-            errors.append(f"{position}: {name!r} is not a row of panel table {table}")
+    for panel_id, view in views.items():
+        for table in view["tables"]:
+            names = [row_label(row, metrics) for row in table.get("metrics", [])]
+            errors.extend(
+                f"panel {panel_id}: {name!r} is not a row of table {table['title']!r}"
+                for name in names
+                if (panel_id, table["title"], name) not in panel_rows
+            )
     return errors
 
 
-def _panel_rows(panels: Dict[int, Dict[str, Any]]) -> Set[Tuple[str, str]]:
-    """Return the (table number, row name) of the panel files' rows."""
+def _panel_rows(panels: Dict[int, Dict[str, Any]]) -> Set[Tuple[int, str, str]]:
+    """Return the (panel id, table title, row name) of the panel files' rows."""
     rows = set()
-    for panel in panels.values():
+    for panel_id, panel in panels.items():
         for source in panel["data source"]:
             render, table = _table(source)
-            if render != METRIC_TABLE:
-                continue
-            number = f"{table['id'] // 100}.{table['id'] % 100}"
-            rows.update((number, name) for name in _table_rows(table))
+            if render == METRIC_TABLE:
+                rows.update(
+                    (panel_id, table["title"], name) for name in _table_rows(table)
+                )
     return rows
 
 
-def swap_rows(views: List[Dict[str, Any]]) -> None:
-    table = next(t for v in views for t in v["tables"] if t["id"] == 1102)
+def swap_rows(views: Dict[int, Dict[str, Any]]) -> None:
+    table = views[1100]["tables"][1]
     table["metrics"][0], table["metrics"][1] = table["metrics"][1], table["metrics"][0]
 
 
-def drop_row(views: List[Dict[str, Any]]) -> None:
-    table = next(t for v in views for t in v["tables"] if t["id"] == 1102)
-    del table["metrics"][2]
+def drop_row(views: Dict[int, Dict[str, Any]]) -> None:
+    del views[1100]["tables"][1]["metrics"][2]
 
 
-def drop_column(views: List[Dict[str, Any]]) -> None:
-    table = next(t for v in views for t in v["tables"] if t["id"] == 1102)
-    del table["header"]["max"]
+def drop_column(views: Dict[int, Dict[str, Any]]) -> None:
+    del views[1100]["tables"][1]["header"]["max"]
 
 
-def change_alias(views: List[Dict[str, Any]]) -> None:
-    next(v for v in views if v["legacy_panel_id"] == 1100)["alias"] = "pipeline"
+def change_alias(views: Dict[int, Dict[str, Any]]) -> None:
+    views[1100]["alias"] = "pipeline"
 
 
-def arch_errors(arch: str, views: List[Dict[str, Any]]) -> List[str]:
+def rename_row(views: Dict[int, Dict[str, Any]]) -> None:
+    views[400]["tables"][0]["metrics"][0]["label"] = "Made-up FLOPs"
+
+
+def arch_errors(arch: str, views: Dict[int, Dict[str, Any]]) -> List[str]:
     metrics = loader.MetricLibrary.load(
         loader.default_metric_library_dir(), arch
     ).metrics
@@ -212,3 +215,14 @@ def test_a_changed_structure_is_reported(change, error):
     change(views)
     errors = arch_errors("gfx942", views)
     assert any(e.startswith(error) for e in errors), errors
+
+
+def test_a_renamed_row_of_a_skipped_panel_is_reported():
+    """gfx908's roofline panel is not compared table by table, but its rows must still
+    be rows of the panel's tables."""
+    views = load_views("gfx908")
+    rename_row(views)
+    errors = arch_errors("gfx908", views)
+    assert errors == [
+        "panel 400: 'Made-up FLOPs' is not a row of table 'Roofline Performance Rates'"
+    ]

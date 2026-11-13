@@ -1,9 +1,7 @@
 view: Instruction Cache
-legacy_panel_id: 1300
 alias: ins_cache
 tables:
-- id: 1301
-  title: L1I Speed-of-Light
+- title: L1I Speed-of-Light
   cli_style: simple_bar
   header:
     metric: Metric
@@ -15,8 +13,7 @@ tables:
   - metric: l1i.hit_rate_incl_dup
     label: Cache Hit Rate
   - metric: l1i.l2_bw_util
-- id: 1302
-  title: L1I cache accesses
+- title: L1I cache accesses
   header:
     metric: Metric
     avg: Avg
@@ -36,8 +33,7 @@ tables:
     label: Cache Hit Rate
   - metric: l1i.fetch_lat
     label: Instruction Fetch Latency
-- id: 1303
-  title: L1I <-> L2 interface
+- title: L1I <-> L2 interface
   header:
     metric: Metric
     avg: Avg
