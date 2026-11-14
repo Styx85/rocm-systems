@@ -77,13 +77,13 @@ tables:
     label: Global/Generic Write
   - metric: ta.global_atomic_insts
     label: Global/Generic Atomic
-  - metric: ta.spill_insts
+  - metric: ta.buffer_insts
     label: Spill/Stack Instr
-  - metric: ta.spill_rd_insts
+  - metric: ta.buffer_rd_insts
     label: Spill/Stack Read
-  - metric: ta.spill_wr_insts
+  - metric: ta.buffer_wr_insts
     label: Spill/Stack Write
-  - metric: ta.spill_atomic_insts
+  - metric: ta.buffer_atomic_insts
     label: Spill/Stack Atomic
 - title: MFMA Arithmetic Instruction Mix
   header:
