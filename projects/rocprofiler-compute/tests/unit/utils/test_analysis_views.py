@@ -130,19 +130,24 @@ def test_view_schema_errors():
 
 
 def test_view_metric_errors():
-    """The shipped gfx942 views, with a metric and a measured peak the library lacks."""
+    """The shipped gfx942 views, with a metric and a measured peak the library lacks,
+    and a Min and Max over summed collectables without per-dispatch partners."""
     views = load_views(ARCH)
-    metrics = loader.MetricLibrary.load(
-        loader.default_metric_library_dir(), ARCH
-    ).metrics
-    assert view_metric_errors(views, metrics) == []
+    library = loader.MetricLibrary.load(loader.default_metric_library_dir(), ARCH)
+    collectables = library.collectable_formulas()
+    assert view_metric_errors(views, library.metrics, collectables) == []
     broken = copy.deepcopy(views)
     rows = dict(iter_view_rows(broken))
     rows["11.2.0"]["metric"] = "compute.made_up"
+    rows["11.2.1"]["metric"] = "fabric.hbm_bw"
     rows["2.1.11"]["peak"] = "empirical"
-    assert view_metric_errors(broken, metrics) == [
+    assert view_metric_errors(broken, library.metrics, collectables) == [
         "2.1.11 compute.branch_util has no 'peak_empirical'",
         "11.2.0 compute.made_up: not a metric of the arch's library",
+        "11.2.1 fabric.hbm_bw: Min and Max read $hbm_read_bandwidth, a sum over all "
+        "dispatches; add $hbm_read_bandwidth_per_dispatch",
+        "11.2.1 fabric.hbm_bw: Min and Max read $hbm_write_bandwidth, a sum over all "
+        "dispatches; add $hbm_write_bandwidth_per_dispatch",
     ]
 
 
