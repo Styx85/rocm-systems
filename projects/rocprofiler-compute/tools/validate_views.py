@@ -48,10 +48,14 @@ def validate(views_dir: Path, metric_dir: Path) -> List[str]:
         if schema_errors:
             errors.extend(schema_errors)
             continue
-        metrics = loader.MetricLibrary.load(metric_dir, arch).metrics
+        library = loader.MetricLibrary.load(metric_dir, arch)
         errors.extend(
             f"[{arch}] {error}"
-            for error in view_metric_errors(load_views(arch, views_dir), metrics)
+            for error in view_metric_errors(
+                load_views(arch, views_dir),
+                library.metrics,
+                library.collectable_formulas(),
+            )
         )
     return errors
 

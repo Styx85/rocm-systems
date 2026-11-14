@@ -25,7 +25,7 @@ import copy
 import re
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Union
 
 import config
 from utils.equation_format import (
@@ -43,7 +43,12 @@ from utils.utils_common import (
     load_yaml,
     mapping_field_errors,
 )
-from utils.utils_counter_defs import per_dispatch_partner, summed_collectables
+from utils.utils_counter_defs import (
+    PER_DISPATCH_SUFFIX,
+    parse_counters_text,
+    per_dispatch_partner,
+    summed_collectables,
+)
 
 # Table kinds, as the panel configs' data source keys; a table without "render" is a
 # metric table.
@@ -205,12 +210,8 @@ def iter_view_rows(
     views: Dict[int, Dict[str, Any]],
 ) -> Iterator[Tuple[str, Dict[str, Any]]]:
     """Yield each metric table row of an arch's views with its numeric id."""
-    for panel_id, view in views.items():
-        for table_id, table in _numbered_tables(panel_id, view):
-            if _render(table) != METRIC_TABLE:
-                continue
-            for index, row in enumerate(table["metrics"]):
-                yield f"{format_table_id(table_id)}.{index}", row
+    for position, row, _ in _iter_rows_with_columns(views):
+        yield position, row
 
 
 def row_metric_ids(row: Dict[str, Any]) -> List[str]:
@@ -242,17 +243,27 @@ def view_schema_errors(documents: Dict[str, Any]) -> List[str]:
 
 
 def view_metric_errors(
-    views: Dict[int, Dict[str, Any]], metrics: Dict[str, Dict[str, Any]]
+    views: Dict[int, Dict[str, Any]],
+    metrics: Dict[str, Dict[str, Any]],
+    collectables: Dict[str, str],
 ) -> List[str]:
     """Return what in an arch's views the arch's metric library cannot show.
 
-    Checks that every metric id exists, and a measured peak exists.
+    Checks that every metric id exists, a measured peak exists, and a row whose table
+    shows Min, Max or Std Dev reads no summed collectable without a per-dispatch
+    partner.
     """
+    unpartnered = {
+        name
+        for name, partner in per_dispatch_partners(collectables).items()
+        if partner is None
+    }
     errors = []
-    for position, row in iter_view_rows(views):
-        errors.extend(
-            f"{position} {error}" for error in _row_metric_errors(row, metrics)
-        )
+    for position, row, columns in _iter_rows_with_columns(views):
+        row_errors = _row_metric_errors(row, metrics)
+        if not row_errors and any(column in AGGREGATE_COLUMNS for column in columns):
+            row_errors = _summed_collectable_errors(row, metrics, unpartnered)
+        errors.extend(f"{position} {error}" for error in row_errors)
     return errors
 
 
@@ -263,6 +274,19 @@ def view_metric_errors(
 
 def _render(table: Dict[str, Any]) -> str:
     return table.get("render", METRIC_TABLE)
+
+
+def _iter_rows_with_columns(
+    views: Dict[int, Dict[str, Any]],
+) -> Iterator[Tuple[str, Dict[str, Any], List[str]]]:
+    """Yield each metric table row of an arch's views with its numeric id and its
+    table's header columns."""
+    for panel_id, view in views.items():
+        for table_id, table in _numbered_tables(panel_id, view):
+            if _render(table) != METRIC_TABLE:
+                continue
+            for index, row in enumerate(table["metrics"]):
+                yield f"{format_table_id(table_id)}.{index}", row, list(table["header"])
 
 
 def _numbered_tables(
@@ -509,3 +533,18 @@ def _row_metric_errors(
         if metric is None or "peak_empirical" not in metric:
             errors.append(f"{row.get('metric')} has no 'peak_empirical'")
     return errors
+
+
+def _summed_collectable_errors(
+    row: Dict[str, Any], metrics: Dict[str, Dict[str, Any]], unpartnered: Set[str]
+) -> List[str]:
+    """Report the summed collectables without a partner that a row's Min, Max and
+    Std Dev would read."""
+    if "metric" not in row:
+        return []
+    _, names = parse_counters_text(metrics[row["metric"]]["formula"])
+    return [
+        f"{row['metric']}: Min and Max read ${name}, a sum over all dispatches; "
+        f"add ${name}{PER_DISPATCH_SUFFIX}"
+        for name in sorted(names & unpartnered)
+    ]
