@@ -43,6 +43,11 @@ pub(crate) fn enqueue_copy_job(
     }
     handles.extend_from_slice(dependency_slice);
     handles.extend(tasks.iter().map(|task| task.completion));
+    let stop = runtime.operation_stop();
+    let cleanup = match runtime.inherit_cleanup() {
+        Ok(cleanup) => cleanup,
+        Err(status) => return status,
+    };
     let mut pending = match PendingAsyncRetention::new(
         &mut runtime.signal_state,
         &mut runtime.memory_state,
@@ -66,11 +71,11 @@ pub(crate) fn enqueue_copy_job(
     );
     let worker_handles = pending.handles.clone();
     let health = pending.memory.health.clone();
-    let stop = runtime.stop_workers.clone();
     let dependency_len = dependency_slice.len();
     let worker = match thread::Builder::new()
         .name("rocddi-hsa-copy".into())
         .spawn(move || {
+            let _lease = cleanup.map(crate::runtime::ApiLeaseScope::enter);
             let mut execute = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
                 wait_async_dependencies(&worker_handles[..dependency_len], &stop)
             }))
@@ -145,6 +150,7 @@ pub(crate) unsafe fn submit_async_copy(
     dependencies: *const HsaSignal,
     completion: HsaSignal,
     engine: Option<u32>,
+    force_sdma: bool,
 ) -> Status {
     boundary(|| {
         let mut guard = match lock() {
@@ -202,11 +208,17 @@ pub(crate) unsafe fn submit_async_copy(
             src_agent,
             size,
             None,
+            if force_sdma {
+                CopyPreference::PreferSdma
+            } else {
+                CopyPreference::Default
+            },
         ) {
             Ok(resolved) => resolved,
             Err(status) => return status,
         };
         let sdma_engine = match (engine, &resolved.route) {
+            (Some(_), AsyncCopyRoute::Gpu { compute: true, .. }) => None,
             (Some(mask), AsyncCopyRoute::Gpu { index, .. }) => {
                 let available = match copy_engine_mask_for_gpu(runtime, *index) {
                     Ok(available) => available,
@@ -425,9 +437,20 @@ fn resolve_indirect_batch_entry(
         .or(runtime.gpu_index(source_agent))
         .or(runtime.gpu_index(destination_agent))
         .ok_or(INVALID_AGENT)?;
-    if runtime.gpus[index].info().gfx_minor != 5 {
+    if (
+        runtime.gpus[index].info().gfx_major,
+        runtime.gpus[index].info().gfx_minor,
+    ) != (12, 5)
+    {
         return Err(NOT_SUPPORTED);
     }
+    copy_uses_compute(
+        runtime,
+        index,
+        source_agent,
+        destination_agent,
+        CopyPreference::RequireSdma,
+    )?;
     let gpu_agent = HsaAgent {
         handle: GPU_AGENT_BASE + index as u64,
     };
@@ -456,6 +479,7 @@ fn resolve_indirect_batch_entry(
     }
     Ok(ResolvedAsyncCopy {
         route: AsyncCopyRoute::Gpu {
+            compute: false,
             device: Box::new(runtime.gpus[index].device.clone()),
             index,
             entry: GpuCopyEntry::Indirect {
@@ -511,6 +535,7 @@ fn resolve_batch_copy_entries(
                 entry.source_agent,
                 entry.size,
                 selected_index,
+                CopyPreference::RequireSdma,
             )?,
         };
         let (device, index, prepared) = match resolved.route {
@@ -518,6 +543,7 @@ fn resolve_batch_copy_entries(
                 device,
                 index,
                 entry,
+                ..
             } => (device, index, entry),
             AsyncCopyRoute::Noop if entries.len() == 1 => {
                 return Ok((AsyncCopyRoute::Noop, borrowed_memory));
@@ -533,12 +559,17 @@ fn resolve_batch_copy_entries(
             else {
                 return Err(NOT_SUPPORTED);
             };
-            if runtime.gpus[index].info().gfx_minor != 5 {
-                return Err(NOT_SUPPORTED);
-            }
+            let info = runtime.gpus[index].info();
+            let alignment = match (info.gfx_major, info.gfx_minor) {
+                (9, 4 | 5) => 64,
+                (12, 5) => 32,
+                _ => return Err(NOT_SUPPORTED),
+            };
             let end_a = source.checked_add(size).ok_or(INVALID_ARGUMENT)?;
             let end_b = destination.checked_add(size).ok_or(INVALID_ARGUMENT)?;
-            if source % 32 != 0 || destination % 32 != 0 || (source < end_b && destination < end_a)
+            if source % alignment != 0
+                || destination % alignment != 0
+                || (source < end_b && destination < end_a)
             {
                 return Err(INVALID_ARGUMENT);
             }
@@ -550,6 +581,7 @@ fn resolve_batch_copy_entries(
                 entry.destination_agent,
                 entry.size,
                 Some(index),
+                CopyPreference::RequireSdma,
             )?;
             if !matches!(
                 reverse.route,
@@ -611,14 +643,163 @@ fn batch_control_address(
     Ok((address, base))
 }
 
+/// Owned geometry decoded while caller descriptor arrays remain readable.
+struct RectBatchEntry {
+    /// Checked addresses, row pitches, and dimensions.
+    rect: CopyRect,
+    /// Complete source span including row and layer gaps.
+    source_size: usize,
+    /// Complete destination span including row and layer gaps.
+    destination_size: usize,
+    /// Agent supplied for this destination.
+    destination_agent: HsaAgent,
+}
+
+/// Decodes every box before native address resolution or publication.
+#[allow(unsafe_code)]
+unsafe fn rect_batch_entries(op: HsaAmdMemoryCopyOp) -> Result<Vec<RectBatchEntry>, Status> {
+    let count = usize::from(op.entry_count);
+    if count == 0 || op.secondary_size != 0 {
+        return Err(INVALID_ARGUMENT);
+    }
+    // SAFETY: RECT selects these arrays; each is retained only until return.
+    let sources = unsafe { batch_slice(op.source.cast::<HsaAmdMemoryCopyRectPtr>(), count)? };
+    let destinations =
+        unsafe { batch_slice(op.destination.cast::<HsaAmdMemoryCopyRectPtr>(), count)? };
+    let ranges = unsafe { batch_slice(op.size.ranges, count)? };
+    let agents = unsafe { batch_slice(op.destination_agent.list, count)? };
+    let mut entries = Vec::new();
+    entries
+        .try_reserve_exact(count)
+        .map_err(|_| OUT_OF_RESOURCES)?;
+    for index in 0..count {
+        let range = ranges[index];
+        if range.x == 0 || range.y == 0 || range.z == 0 {
+            return Err(INVALID_ARGUMENT);
+        }
+        let source = sources[index];
+        let destination = destinations[index];
+        let (source_address, source_size) =
+            pitched_copy_range(source.pitched_ptr, source.offset, range).ok_or(INVALID_ARGUMENT)?;
+        let (destination_address, destination_size) =
+            pitched_copy_range(destination.pitched_ptr, destination.offset, range)
+                .ok_or(INVALID_ARGUMENT)?;
+        entries.push(RectBatchEntry {
+            rect: CopyRect {
+                destination: destination_address as u64,
+                source: source_address as u64,
+                width: u64::from(range.x),
+                height: range.y,
+                depth: range.z,
+                destination_pitch: destination.pitched_ptr.pitch as u64,
+                source_pitch: source.pitched_ptr.pitch as u64,
+                destination_slice: destination.pitched_ptr.slice as u64,
+                source_slice: source.pitched_ptr.slice as u64,
+            },
+            source_size,
+            destination_size,
+            destination_agent: agents[index],
+        });
+    }
+    Ok(entries)
+}
+
+/// Copies and resolves every box before an asynchronous batch is accepted.
+#[allow(unsafe_code)]
+unsafe fn resolve_rect_batch(
+    runtime: &HsaState,
+    op: HsaAmdMemoryCopyOp,
+) -> Result<(AsyncCopyRoute, Vec<Option<usize>>), Status> {
+    // SAFETY: The caller supplies all descriptor arrays until this call returns.
+    let decoded = unsafe { rect_batch_entries(op)? };
+    let mut entries = Vec::new();
+    let mut bases = Vec::new();
+    entries
+        .try_reserve_exact(decoded.len())
+        .map_err(|_| OUT_OF_RESOURCES)?;
+    bases
+        .try_reserve_exact(decoded.len() * 2)
+        .map_err(|_| OUT_OF_RESOURCES)?;
+    let mut selected = runtime.gpu_index(op.source_agent);
+    for entry in decoded {
+        let source_address = entry.rect.source as usize;
+        let destination_address = entry.rect.destination as usize;
+        let source_size = entry.source_size;
+        let destination_size = entry.destination_size;
+        let source_description = copy_pointer_description(runtime, source_address, source_size)?;
+        let destination_description =
+            copy_pointer_description(runtime, destination_address, destination_size)?;
+        let source_agent = copy_agent(runtime, op.source_agent, source_description.as_ref())?;
+        let destination_agent = copy_agent(
+            runtime,
+            entry.destination_agent,
+            destination_description.as_ref(),
+        )?;
+        if runtime.gpu_index(source_agent).is_none()
+            && runtime.gpu_index(destination_agent).is_none()
+        {
+            return Err(INVALID_AGENT);
+        }
+        let gpu_index = *selected.get_or_insert(
+            runtime
+                .gpu_index(source_agent)
+                .or(runtime.gpu_index(destination_agent))
+                .ok_or(INVALID_AGENT)?,
+        );
+        copy_uses_compute(
+            runtime,
+            gpu_index,
+            source_agent,
+            destination_agent,
+            CopyPreference::RequireSdma,
+        )?;
+        let gpu_agent = HsaAgent {
+            handle: GPU_AGENT_BASE + gpu_index as u64,
+        };
+        let (source_address, source_base) = gpu_copy_address(
+            runtime,
+            source_description.as_ref(),
+            source_address,
+            source_size,
+            gpu_agent,
+            ACCESS_PERMISSION_RO,
+        )?;
+        let (destination_address, destination_base) = gpu_copy_address(
+            runtime,
+            destination_description.as_ref(),
+            destination_address,
+            destination_size,
+            gpu_agent,
+            ACCESS_PERMISSION_WO,
+        )?;
+        entries.push(GpuCopyEntry::Rect(CopyRect {
+            destination: destination_address,
+            source: source_address,
+            ..entry.rect
+        }));
+        bases.extend([Some(source_base), Some(destination_base)]);
+    }
+    let index = selected.ok_or(INVALID_AGENT)?;
+    Ok((
+        AsyncCopyRoute::GpuBatch {
+            device: Box::new(runtime.gpus[index].device.clone()),
+            index,
+            entries,
+            controls: BatchCopyControls::default(),
+        },
+        bases,
+    ))
+}
+
 #[allow(unsafe_code)]
 /// Prepares batch copy before publication or execution.
 pub(crate) unsafe fn prepare_batch_copy(
     runtime: &HsaState,
     operations: &[HsaAmdMemoryCopyOp],
 ) -> Result<PreparedBatchCopy, Status> {
-    if operations.is_empty() {
-        return Err(INVALID_ARGUMENT);
+    let completion = batch_completion(operations)?;
+    if !runtime.signal_state.owns_signal(completion) {
+        return Err(INVALID_SIGNAL);
     }
     let mut tasks = Vec::new();
     tasks
@@ -626,7 +807,7 @@ pub(crate) unsafe fn prepare_batch_copy(
         .map_err(|_| OUT_OF_RESOURCES)?;
     for &op in operations {
         if op.version != 1
-            || op.operation > 5
+            || op.operation > 6
             || op.reserved != [0]
             || op.wait.reserved != 0
             || op.wait.function > 6
@@ -637,9 +818,6 @@ pub(crate) unsafe fn prepare_batch_copy(
         {
             return Err(INVALID_ARGUMENT);
         }
-        if !runtime.signal_state.owns_signal(op.completion_signal) {
-            return Err(INVALID_SIGNAL);
-        }
         if op.traffic_class != 0 {
             return Err(NOT_SUPPORTED);
         }
@@ -647,7 +825,7 @@ pub(crate) unsafe fn prepare_batch_copy(
             && (!op.wait.address.is_null()
                 || op.wait.value != 0
                 || op.wait.mask != 0
-                || op.wait.scope != 0 && op.operation < 3))
+                || op.wait.scope != 0 && !matches!(op.operation, 3..=5)))
             || (op.wait.function != 0 && op.wait.address.is_null())
             || (op.signal.operation == 0
                 && (op.signal.scope != 0 || !op.signal.address.is_null() || op.signal.data != 0))
@@ -660,8 +838,12 @@ pub(crate) unsafe fn prepare_batch_copy(
         }
         // SAFETY: Each operation selects the documented scalar or array union
         // members. All array values are copied before the caller returns.
-        let entries = unsafe { batch_copy_entries(op)? };
-        let (mut route, mut bases) = resolve_batch_copy_entries(runtime, &entries)?;
+        let (mut route, mut bases) = if op.operation == 6 {
+            unsafe { resolve_rect_batch(runtime, op)? }
+        } else {
+            let entries = unsafe { batch_copy_entries(op)? };
+            resolve_batch_copy_entries(runtime, &entries)?
+        };
         if let AsyncCopyRoute::GpuBatch {
             index,
             entries,
@@ -670,11 +852,15 @@ pub(crate) unsafe fn prepare_batch_copy(
         } = &mut route
         {
             if (op.wait.function != 0 || op.signal.operation != 0)
-                && (runtime.gpus[*index].info().gfx_minor != 5
+                && ((
+                    runtime.gpus[*index].info().gfx_major,
+                    runtime.gpus[*index].info().gfx_minor,
+                ) != (12, 5)
                     || entries.iter().any(|entry| {
                         !matches!(
                             entry,
                             GpuCopyEntry::Linear { .. }
+                                | GpuCopyEntry::Rect(_)
                                 | GpuCopyEntry::Swap { .. }
                                 | GpuCopyEntry::Indirect { .. }
                         )
@@ -732,12 +918,30 @@ pub(crate) unsafe fn prepare_batch_copy(
     Ok(PreparedBatchCopy { tasks })
 }
 
+/// A batch shares one signal, decremented once for each complete operation.
+fn batch_completion(operations: &[HsaAmdMemoryCopyOp]) -> Result<HsaSignal, Status> {
+    let completion = operations
+        .first()
+        .ok_or(INVALID_ARGUMENT)?
+        .completion_signal;
+    if operations
+        .iter()
+        .any(|op| op.completion_signal != completion)
+    {
+        return Err(INVALID_ARGUMENT);
+    }
+    Ok(completion)
+}
+
 /// Computes the address range covered by a pitched copy.
 pub(crate) fn pitched_copy_range(
     pitched: HsaPitchedPtr,
     offset: HsaDim3,
     range: HsaDim3,
 ) -> Option<(usize, usize)> {
+    if range.x == 0 || range.y == 0 || range.z == 0 {
+        return None;
+    }
     let base = pitched.base as usize;
     let pitch = pitched.pitch;
     let slice = pitched.slice;
@@ -761,6 +965,9 @@ pub(crate) fn pitched_copy_range(
 
 /// Copies engine mask for GPU after validating its source and destination.
 fn copy_engine_mask_for_gpu(runtime: &HsaState, index: usize) -> Result<u32, Status> {
+    if !runtime.sdma_enabled {
+        return Ok(0);
+    }
     let gpu = runtime.gpus[index].device.gpu().map_err(map_error)?;
     if !gpu.supports_linear_copy() {
         return Ok(0);
@@ -776,8 +983,127 @@ pub(crate) fn copy_engine_mask(
     dst: HsaAgent,
     src: HsaAgent,
 ) -> Result<u32, Status> {
+    if !runtime.peer_sdma_enabled
+        && dst != src
+        && runtime.gpu_index(dst).is_some()
+        && runtime.gpu_index(src).is_some()
+    {
+        return Ok(0);
+    }
     let Some(index) = runtime.gpu_index(src).or_else(|| runtime.gpu_index(dst)) else {
         return Ok(0);
     };
     copy_engine_mask_for_gpu(runtime, index)
+}
+
+#[cfg(test)]
+#[allow(clippy::unwrap_used)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn mixed_batches_require_one_shared_completion_for_all_operations() {
+        // SAFETY: The public C operation contains only scalar/pointer unions.
+        let mut operations = unsafe { [std::mem::zeroed::<HsaAmdMemoryCopyOp>(); 2] };
+        operations[0].completion_signal.handle = 7;
+        operations[1].operation = 6;
+        operations[1].completion_signal.handle = 7;
+        assert_eq!(batch_completion(&operations).unwrap().handle, 7);
+        operations[1].completion_signal.handle = 8;
+        assert_eq!(batch_completion(&operations).err(), Some(INVALID_ARGUMENT));
+        assert_eq!(batch_completion(&[]).err(), Some(INVALID_ARGUMENT));
+    }
+
+    #[test]
+    fn rect_batch_owns_geometry_after_caller_arrays_expire() {
+        let entries = {
+            let source = HsaAmdMemoryCopyRectPtr {
+                pitched_ptr: HsaPitchedPtr {
+                    base: 0x1000 as *mut c_void,
+                    pitch: 64,
+                    slice: 512,
+                },
+                offset: HsaDim3 { x: 4, y: 1, z: 1 },
+            };
+            let destination = HsaAmdMemoryCopyRectPtr {
+                pitched_ptr: HsaPitchedPtr {
+                    base: 0x4000 as *mut c_void,
+                    pitch: 128,
+                    slice: 1024,
+                },
+                offset: HsaDim3 { x: 8, y: 2, z: 0 },
+            };
+            let range = HsaDim3 { x: 16, y: 3, z: 2 };
+            let agent = HsaAgent {
+                handle: GPU_AGENT_BASE + 1,
+            };
+            // SAFETY: This C descriptor has only integer/pointer/union fields.
+            let mut op: HsaAmdMemoryCopyOp = unsafe { std::mem::zeroed() };
+            op.operation = 6;
+            op.entry_count = 1;
+            op.source = (&raw const source).cast_mut().cast();
+            op.destination = (&raw const destination).cast_mut().cast();
+            op.destination_agent.list = &raw const agent;
+            op.size.ranges = &raw const range;
+            // SAFETY: All four one-element descriptor arrays are readable.
+            unsafe { rect_batch_entries(op) }.unwrap()
+        };
+        assert_eq!(entries.len(), 1);
+        let entry = &entries[0];
+        assert_eq!(entry.rect.source, 0x1244);
+        assert_eq!(entry.rect.destination, 0x4108);
+        assert_eq!(entry.source_size, 656);
+        assert_eq!(entry.destination_size, 1296);
+        assert_eq!(entry.rect.width, 16);
+        assert_eq!(entry.destination_agent.handle, GPU_AGENT_BASE + 1);
+    }
+
+    #[test]
+    fn rectangular_geometry_rejects_empty_overflowing_or_misaligned_ranges() {
+        let pitched = HsaPitchedPtr {
+            base: 0x1000 as *mut c_void,
+            pitch: 64,
+            slice: 512,
+        };
+        let origin = HsaDim3 { x: 0, y: 0, z: 0 };
+        for range in [
+            HsaDim3 { x: 0, y: 1, z: 1 },
+            HsaDim3 { x: 4, y: 0, z: 1 },
+            HsaDim3 { x: 4, y: 1, z: 0 },
+            HsaDim3 { x: 65, y: 1, z: 1 },
+            HsaDim3 { x: 3, y: 1, z: 1 },
+        ] {
+            assert!(pitched_copy_range(pitched, origin, range).is_none());
+        }
+        let range = HsaDim3 { x: 16, y: 1, z: 1 };
+        assert!(pitched_copy_range(pitched, HsaDim3 { x: 52, y: 0, z: 0 }, range).is_none());
+        assert!(
+            pitched_copy_range(
+                HsaPitchedPtr {
+                    base: (usize::MAX - 3) as *mut c_void,
+                    ..pitched
+                },
+                origin,
+                range
+            )
+            .is_none()
+        );
+        // SAFETY: Rejected descriptors never dereference the absent arrays.
+        let mut op: HsaAmdMemoryCopyOp = unsafe { std::mem::zeroed() };
+        assert_eq!(
+            unsafe { rect_batch_entries(op) }.err(),
+            Some(INVALID_ARGUMENT)
+        );
+        op.entry_count = 1;
+        op.secondary_size = 1;
+        assert_eq!(
+            unsafe { rect_batch_entries(op) }.err(),
+            Some(INVALID_ARGUMENT)
+        );
+        op.secondary_size = 0;
+        assert_eq!(
+            unsafe { rect_batch_entries(op) }.err(),
+            Some(INVALID_ARGUMENT)
+        );
+    }
 }

@@ -100,16 +100,67 @@ fn handle_queue_event(key: usize, observed: SignalValue) -> Option<QueueEventOut
         return None;
     }
     let error = observed as u64;
+    if (error == 512 || aql_scratch_lanes(error).is_some())
+        && runtime
+            .queue_state
+            .queues
+            .get(&key)?
+            .scratch_reclaim_pending
+    {
+        // CP can request another allocation while an older packet still uses
+        // the bounded backing. Preserve the request until reclamation retires.
+        return Some(QueueEventOutcome {
+            callback: None,
+            rearm: true,
+        });
+    }
+    if error == 512 {
+        let queue = runtime.queue_state.queues.get_mut(&key)?;
+        let public = queue.public_handle;
+        // SAFETY: CP's use-once event proves the last scratch use completed.
+        let (native, backing) = unsafe { queue.native.parts_mut() };
+        // SAFETY: Backing remains owned until clearing the stopped descriptor succeeds.
+        if let Err(error) = unsafe { native.clear_scratch() } {
+            return Some(QueueEventOutcome {
+                callback: pending_callback(runtime, key, map_error(error)),
+                rearm: false,
+            });
+        }
+        let old = backing.scratch.take();
+        backing.inactive_signal.release_queue();
+        scratch::use_once(&queue.native, false);
+        drop(guard);
+        if let Some(old) = old {
+            crate::tool_events::free_start(public as *const HsaQueue);
+            drop(old);
+            crate::tool_events::free_end(public as *const HsaQueue);
+        }
+        return Some(QueueEventOutcome {
+            callback: None,
+            rearm: true,
+        });
+    }
     let Some(lanes_per_wave) = aql_scratch_lanes(error) else {
         return Some(QueueEventOutcome {
             callback: pending_error_callback(runtime, key, queue_error_status(error)),
             rearm: false,
         });
     };
-    let (device, gpu, public, private_segment_size, dispatch_id) = {
+    let (
+        device,
+        gpu,
+        public,
+        private_segment_size,
+        dispatch_id,
+        lanes_per_group,
+        policy,
+        cooperative,
+    ) = {
         let queue = runtime.queue_state.queues.get(&key)?;
         let index = runtime.gpu_index(queue.agent)?;
-        let Some((private_segment_size, dispatch_id)) = dispatch_private_segment(queue) else {
+        let Some((private_segment_size, dispatch_id, lanes_per_group)) =
+            dispatch_private_segment(queue)
+        else {
             return Some(QueueEventOutcome {
                 callback: pending_callback(runtime, key, ERROR),
                 rearm: false,
@@ -121,11 +172,21 @@ fn handle_queue_event(key: usize, observed: SignalValue) -> Option<QueueEventOut
             queue.public_handle,
             private_segment_size,
             dispatch_id,
+            lanes_per_group,
+            queue.scratch_policy.clone(),
+            queue.cooperative_refs != 0,
         )
     };
     drop(guard);
     crate::tool_events::alloc_start(public as *const HsaQueue, dispatch_id);
-    let allocated = allocate_scratch(&device, gpu, private_segment_size, lanes_per_wave);
+    let allocated = scratch::allocate_with_pressure(
+        &device,
+        &gpu,
+        private_segment_size,
+        lanes_per_wave,
+        lanes_per_group.div_ceil(lanes_per_wave),
+        policy.reduce_occupancy && !cooperative,
+    );
     let mut guard = if let Ok(guard) = lock() {
         guard
     } else {
@@ -142,7 +203,7 @@ fn handle_queue_event(key: usize, observed: SignalValue) -> Option<QueueEventOut
         crate::tool_events::alloc_end(public as *const HsaQueue, dispatch_id, 0, 0);
         return None;
     };
-    let result = allocated.and_then(|(allocation, scratch)| {
+    let result = allocated.and_then(|(allocation, scratch, reduced)| {
         // SAFETY: The backing stays paired with this queue, and the candidate
         // is staged before its address can be written to native control state.
         let (native, backing) = unsafe { queue.native.parts_mut() };
@@ -159,6 +220,28 @@ fn handle_queue_event(key: usize, observed: SignalValue) -> Option<QueueEventOut
             },
         )?;
         let old_visible = queue.scratch_event_visibility == ScratchEventVisibility::Published;
+        let use_once = reduced
+            || policy.reclaim
+                && !cooperative
+                && scratch.byte_length
+                    > if policy.asynchronous {
+                        policy.async_limit.load(Ordering::Acquire)
+                    } else {
+                        policy.single_limit
+                    };
+        // Publish USE_SCRATCH_ONCE before releasing the CP's stopped queue.
+        if let Some(control) = native.info().aql_control {
+            // SAFETY: Native queue owns the aligned properties word.
+            let properties = unsafe {
+                &*(AqlControlRegion::properties_address_at(control.host_base())
+                    as *const std::sync::atomic::AtomicU32)
+            };
+            if use_once {
+                properties.fetch_or(1 << 4, Ordering::Release);
+            } else {
+                properties.fetch_and(!(1 << 4), Ordering::Release);
+            }
+        }
         backing.inactive_signal.release_queue();
         Ok((scratch, old, old_visible))
     });
@@ -200,6 +283,75 @@ fn handle_queue_event(key: usize, observed: SignalValue) -> Option<QueueEventOut
     Some(outcome)
 }
 
+/// Reclaims over-limit or idle scratch on the queue's asynchronous worker.
+fn reclaim_idle_scratch(key: usize, stop: &AtomicBool) {
+    let Ok(mut guard) = lock() else { return };
+    let Some(runtime) = guard.as_mut() else {
+        return;
+    };
+    let Some(queue) = runtime.queue_state.queues.get_mut(&key) else {
+        return;
+    };
+    if !queue.scratch_policy.asynchronous
+        || queue.cooperative_refs != 0
+        || queue.inactivated
+        || queue.teardown_started
+    {
+        return;
+    }
+    let Ok((read, write)) = queue.native.progress() else {
+        return;
+    };
+    if read == 0 {
+        return;
+    }
+    if read != write {
+        queue.scratch_idle_since = None;
+    } else if queue.scratch_idle_since.is_none() {
+        queue.scratch_idle_since = Some(std::time::Instant::now());
+    }
+    let idle = queue
+        .scratch_idle_since
+        .is_some_and(|since| since.elapsed() >= Duration::from_millis(100));
+    if !queue.scratch_reclaim_pending
+        && let Some(control) = queue.native.info().aql_control
+    {
+        // Use-once scratch has its own CP retirement event (512). Do not
+        // overlap that protocol with asynchronous index-bound reclamation.
+        let properties =
+            unsafe { &*(control.properties_host_address() as *const std::sync::atomic::AtomicU32) };
+        if properties.load(Ordering::Acquire) & (1 << 4) != 0 {
+            return;
+        }
+    }
+    // SAFETY: Native queue and its scratch stay paired throughout reclamation.
+    let (native, backing) = unsafe { queue.native.parts_mut() };
+    let Some(allocation) = &backing.scratch else {
+        return;
+    };
+    let over_limit =
+        allocation.info().size > queue.scratch_policy.async_limit.load(Ordering::Acquire);
+    if !idle && !over_limit && !queue.scratch_reclaim_pending {
+        return;
+    }
+    match native.reclaim_scratch(stop) {
+        Ok(()) => queue.scratch_reclaim_pending = false,
+        Err(error) => {
+            queue.scratch_reclaim_pending |= error.kind() == rocddi::ErrorKind::Busy;
+            return;
+        }
+    }
+    let old = backing.scratch.take();
+    let public = queue.public_handle;
+    queue.scratch_idle_since = None;
+    drop(guard);
+    if let Some(old) = old {
+        crate::tool_events::free_start(public as *const HsaQueue);
+        drop(old);
+        crate::tool_events::free_end(public as *const HsaQueue);
+    }
+}
+
 /// Polls queue events and invokes callbacks outside the runtime lock.
 pub(super) fn queue_event_worker(
     stop: &AtomicBool,
@@ -211,7 +363,12 @@ pub(super) fn queue_event_worker(
     let mut inactive_armed = true;
     let mut error_armed = true;
     let mut observer_failure_checked = false;
+    let mut reclaim_check = std::time::Instant::now();
     while !stop.load(Ordering::Acquire) && alive.load(Ordering::Acquire) {
+        let Some(_lease) = crate::runtime::enter_runtime_service() else {
+            thread::sleep(Duration::from_millis(1));
+            continue;
+        };
         let error = signal.load_error();
         let callback = if !observer_failure_checked && observer_failed.load(Ordering::Acquire) {
             observer_failure_checked = true;
@@ -274,6 +431,10 @@ pub(super) fn queue_event_worker(
                     callback.data.as_ptr(),
                 )
             };
+        }
+        if reclaim_check.elapsed() >= Duration::from_millis(25) {
+            reclaim_check = std::time::Instant::now();
+            reclaim_idle_scratch(key, stop);
         }
         thread::sleep(Duration::from_micros(20));
     }

@@ -9,6 +9,31 @@ use crate::device::gpu::GpuDevice;
 use crate::driver::{GpuDriverRef, PcSamplingState};
 use std::num::NonZeroU32;
 
+impl GpuDevice<'_> {
+    /// Queries whether the active native runtime uses this debugger rendezvous.
+    /// A preferred registration can lose to another client between passive
+    /// session configuration and GPU activation; check before installing traps.
+    ///
+    /// # Errors
+    /// Rejects another provider or an inherited/invalid native connection.
+    pub fn debugger_registration_matches(
+        &self,
+        address: usize,
+        setup_ttmp: bool,
+    ) -> Result<bool, Error> {
+        match self.driver {
+            GpuDriverRef::LinuxKfd { state, .. } => {
+                state.debugger_registration_matches(address, setup_ttmp)
+            }
+            #[cfg(test)]
+            GpuDriverRef::Test { .. } => Err(Error::Operation {
+                kind: crate::ErrorKind::Unsupported,
+                detail: "runtime debugger registration requires a Linux KFD GPU",
+            }),
+        }
+    }
+}
+
 /// A stopped KFD trace registration in the primary process context.
 /// Equal numeric IDs from another driver or context are not interchangeable.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

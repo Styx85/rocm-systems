@@ -91,7 +91,7 @@ fn gfx1201_code_object() -> Vec<u8> {
 
     let kernel = SYMBOL_OFFSET + 24;
     write_u32(&mut bytes, kernel, 1);
-    bytes[kernel + 4] = (SYMBOL_BINDING_GLOBAL << 4) | SYMBOL_TYPE_AMDGPU_HSA_KERNEL;
+    bytes[kernel + 4] = (SYMBOL_BINDING_GLOBAL << 4) | SYMBOL_TYPE_OBJECT;
     write_u16(&mut bytes, kernel + 6, 3);
     write_u64(&mut bytes, kernel + 8, 0x1000);
     write_u64(&mut bytes, kernel + 16, 64);
@@ -157,6 +157,34 @@ fn rejects_non_hsa_elf_images() {
     let mut bytes = gfx1201_code_object();
     bytes[7] = 0;
     assert!(matches!(parse_elf_layout(&bytes), Err(INVALID_CODE_OBJECT)));
+}
+
+#[test]
+/// Legacy kernels and short descriptor sections cannot use modern metadata.
+fn rejects_legacy_and_truncated_kernel_descriptors() {
+    let mut bytes = gfx1201_code_object();
+    bytes[8] = 0;
+    assert!(matches!(
+        LoaderCodeObject::parse(&bytes),
+        Err(rocloader::Error::InvalidObject)
+    ));
+    let mut bytes = gfx1201_code_object();
+    // The fixture has more bytes after .text, but those are not descriptor bytes.
+    write_u64(&mut bytes, 64 + 192 + 32, 32);
+    assert!(
+        LoaderCodeObject::parse(&bytes)
+            .unwrap()
+            .symbols(SymbolTableOrder::RegularFirst)
+            .is_err()
+    );
+    let mut bytes = gfx1201_code_object();
+    bytes[448 + 24 + 4] = (SYMBOL_BINDING_GLOBAL << 4) | SYMBOL_TYPE_AMDGPU_HSA_KERNEL;
+    assert!(
+        LoaderCodeObject::parse(&bytes)
+            .unwrap()
+            .symbols(SymbolTableOrder::RegularFirst)
+            .is_err()
+    );
 }
 
 #[test]
@@ -332,4 +360,11 @@ fn applies_relative_and_defined_absolute_relocations() {
     );
     assert_eq!(read_u64(&image, 0x20), Some(0x1080));
     assert_eq!(read_u64(&image, 0x28), Some(0x1048));
+    // A supplied destination may be below the object's preferred virtual base.
+    assert_eq!(
+        apply_relocations(&bytes, layout, 0x100, 0x80, &mut image, |_| None),
+        Ok(())
+    );
+    assert_eq!(read_u64(&image, 0x20), Some(0x100));
+    assert_eq!(read_u64(&image, 0x28), Some(0xc8));
 }
