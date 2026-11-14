@@ -144,7 +144,7 @@ class OmniAnalyze_Base:
         ac = schema.ArchConfig()
         if list_stats:
             top_stats = {TOP_STATS_PANEL_ID: BUILT_IN_VIEWS[TOP_STATS_PANEL_ID]}
-            ac.panel_configs = views_to_panel_configs(top_stats, {})
+            ac.panel_configs = views_to_panel_configs(top_stats, {}, {})
         else:
             config_arch = canonical_config_arch(arch) or arch
             ac.panel_configs = load_panel_configs([

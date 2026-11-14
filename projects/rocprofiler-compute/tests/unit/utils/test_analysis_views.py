@@ -26,10 +26,11 @@ from utils.analysis_views import (
 from utils.utils_common import metric_ids_by_name
 
 ARCH = "gfx942"
-# The instructions gfx942's compute.ipc_issued counts, per kernel.
-ISSUED = (
-    "SQ_INSTS_VALU + SQ_INSTS_VMEM + SQ_INSTS_SALU + SQ_INSTS_SMEM + SQ_INSTS_BRANCH"
-    " + SQ_INSTS_SENDMSG + SQ_INSTS_VSKIPPED + SQ_INSTS_LDS"
+# gfx942's compute.ipc_issued per kernel: the per-dispatch partners of its summed
+# collectables.
+IPC_ISSUED_PER_KERNEL = (
+    "$ipc_valu_vmem_salu_smem_per_dispatch"
+    " + $ipc_branch_sendmsg_vskipped_lds_per_dispatch"
 )
 # A view with one mistake of each kind the shape check reports.
 BROKEN_VIEW = {
@@ -58,11 +59,11 @@ BROKEN_VIEW = {
 def metric_rows(arch):
     """Return the arch's views, metrics, and panel config rows by numeric id."""
     views = load_views(arch)
-    metrics = loader.MetricLibrary.load(
-        loader.default_metric_library_dir(), arch
-    ).metrics
+    library = loader.MetricLibrary.load(loader.default_metric_library_dir(), arch)
+    metrics = library.metrics
     rows = {}
-    for panel in views_to_panel_configs(views, metrics).values():
+    panels = views_to_panel_configs(views, metrics, library.collectable_formulas())
+    for panel in panels.values():
         for source in panel["data source"]:
             table = source.get("metric_table")
             if not table:
@@ -80,8 +81,8 @@ def test_rows_show_their_metric_as_the_view_asks():
         ipc["name"],
         {
             "avg": ipc["formula"],
-            "min": f"MIN(({ISSUED}) / SQ_ACTIVE_INST_ANY)",
-            "max": f"MAX(({ISSUED}) / SQ_ACTIVE_INST_ANY)",
+            "min": f"MIN({IPC_ISSUED_PER_KERNEL})",
+            "max": f"MAX({IPC_ISSUED_PER_KERNEL})",
             "unit": ipc["unit"],
         },
     )
@@ -97,7 +98,7 @@ def test_rows_show_their_metric_as_the_view_asks():
 
 def test_panel_descriptions_come_from_the_library():
     views, metrics, _ = metric_rows(ARCH)
-    panel = views_to_panel_configs(views, metrics)[1100]
+    panel = views_to_panel_configs(views, metrics, {})[1100]
     ipc = metrics["compute.ipc"]
     assert panel["metrics_description"][ipc["name"]] == ipc["description"]
 

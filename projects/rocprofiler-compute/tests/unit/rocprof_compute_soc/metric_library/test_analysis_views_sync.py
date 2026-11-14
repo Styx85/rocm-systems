@@ -53,7 +53,7 @@ def structure_errors(
     for panel_id in LEFT_OUT_PANELS.get(arch, ()):
         del expected[panel_id]
     panel_rows = _panel_rows(expected)
-    actual = views_to_panel_configs(views, metrics)
+    actual = views_to_panel_configs(views, metrics, {})
     for file_id in common.unshown_file_ids(arch):
         expected.pop(int(file_id), None)
         actual.pop(int(file_id), None)

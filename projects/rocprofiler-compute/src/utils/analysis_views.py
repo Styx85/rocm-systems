@@ -33,6 +33,7 @@ from utils.equation_format import (
     BinaryOpNode,
     FunctionCallNode,
     UnaryOpNode,
+    VariableNode,
     format_equation,
     parse_equation,
 )
@@ -42,6 +43,7 @@ from utils.utils_common import (
     load_yaml,
     mapping_field_errors,
 )
+from utils.utils_counter_defs import per_dispatch_partner, summed_collectables
 
 # Table kinds, as the panel configs' data source keys; a table without "render" is a
 # metric table.
@@ -157,21 +159,38 @@ def view_panel_id(file_name: str) -> int:
 
 
 def views_to_panel_configs(
-    views: Dict[int, Dict[str, Any]], metrics: Dict[str, Dict[str, Any]]
+    views: Dict[int, Dict[str, Any]],
+    metrics: Dict[str, Dict[str, Any]],
+    collectables: Dict[str, str],
 ) -> "OrderedDict[int, Dict[str, Any]]":
     """Return the panel configs of an arch's views, as load_panel_configs() does.
 
     Args:
         views: One arch's views by panel id (load_views()).
         metrics: The arch's metric library metrics (MetricLibrary.metrics).
+        collectables: The arch's collectable formulas by name
+            (MetricLibrary.collectable_formulas()).
 
     Returns:
         Each view's panel config, keyed by panel id, in panel id order.
     """
+    partners = per_dispatch_partners(collectables)
     return OrderedDict(
-        (panel_id, _panel_config(panel_id, views[panel_id], metrics))
+        (panel_id, _panel_config(panel_id, views[panel_id], metrics, partners))
         for panel_id in sorted(views)
     )
+
+
+def per_dispatch_partners(collectables: Dict[str, str]) -> Dict[str, Optional[str]]:
+    """Return each summed collectable's per-dispatch partner, or None if it has none.
+
+    A summed collectable is one value for all dispatches, so a Min, Max or Std Dev
+    over kernels reads its partner instead.
+    """
+    return {
+        name: per_dispatch_partner(name, collectables)
+        for name in summed_collectables(collectables)
+    }
 
 
 def panel_aliases(views: Dict[int, Dict[str, Any]]) -> Dict[str, str]:
@@ -255,13 +274,16 @@ def _numbered_tables(
 
 
 def _panel_config(
-    panel_id: int, view: Dict[str, Any], metrics: Dict[str, Dict[str, Any]]
+    panel_id: int,
+    view: Dict[str, Any],
+    metrics: Dict[str, Dict[str, Any]],
+    partners: Dict[str, Optional[str]],
 ) -> Dict[str, Any]:
     return {
         "id": panel_id,
         "title": view["view"],
         "data source": [
-            {_render(table): _table_config(table_id, table, metrics)}
+            {_render(table): _table_config(table_id, table, metrics, partners)}
             for table_id, table in _numbered_tables(panel_id, view)
         ],
         "metrics_description": _panel_descriptions(view, metrics),
@@ -269,7 +291,10 @@ def _panel_config(
 
 
 def _table_config(
-    table_id: int, table: Dict[str, Any], metrics: Dict[str, Dict[str, Any]]
+    table_id: int,
+    table: Dict[str, Any],
+    metrics: Dict[str, Dict[str, Any]],
+    partners: Dict[str, Optional[str]],
 ) -> Dict[str, Any]:
     config_keys = ("title", "header", "source", "columnwise")
     table_config = {"id": table_id}
@@ -278,7 +303,7 @@ def _table_config(
         return table_config
     columns = [column for column in table["header"] if column != "metric"]
     rows = {
-        row_label(row, metrics): _row_values(row, columns, metrics)
+        row_label(row, metrics): _row_values(row, columns, metrics, partners)
         for row in table["metrics"]
     }
     if "placeholder_range" in table:
@@ -288,7 +313,10 @@ def _table_config(
 
 
 def _row_values(
-    row: Dict[str, Any], columns: List[str], metrics: Dict[str, Dict[str, Any]]
+    row: Dict[str, Any],
+    columns: List[str],
+    metrics: Dict[str, Dict[str, Any]],
+    partners: Dict[str, Optional[str]],
 ) -> Dict[str, Any]:
     """Return a row's value in each column, in column order."""
     metric = metrics.get(row.get("metric"))
@@ -302,7 +330,7 @@ def _row_values(
         elif column in MAIN_COLUMNS:
             values[column] = _main_formula(row, metric)
         elif column in AGGREGATE_COLUMNS:
-            values[column] = _aggregate(column, metric)
+            values[column] = _aggregate(column, metric, partners)
         elif column == "unit":
             values[column] = metric["unit"] if metric else NO_VALUE
         elif column == "peak":
@@ -323,25 +351,35 @@ def _main_formula(row: Dict[str, Any], metric: Optional[Dict[str, Any]]) -> str:
     return metric["formula"]
 
 
-def _aggregate(column: str, metric: Optional[Dict[str, Any]]) -> str:
+def _aggregate(
+    column: str,
+    metric: Optional[Dict[str, Any]],
+    partners: Dict[str, Optional[str]],
+) -> str:
     """Return a column's aggregate over kernels of the metric's formula, per kernel."""
     if metric is None:
         return NO_VALUE
-    per_kernel = _per_kernel(parse_equation(metric["formula"]))
+    per_kernel = _per_kernel(parse_equation(metric["formula"]), partners)
     return format_equation(FunctionCallNode(AGGREGATE_COLUMNS[column], [per_kernel]))
 
 
-def _per_kernel(node: ASTNode) -> ASTNode:
-    """Return a formula tree per kernel: each SUM(x) and AVG(x) becomes x."""
+def _per_kernel(node: ASTNode, partners: Dict[str, Optional[str]]) -> ASTNode:
+    """Return a formula tree per kernel: each SUM(x) and AVG(x) becomes x, and each
+    summed collectable with a per-dispatch partner becomes the partner."""
     if isinstance(node, FunctionCallNode):
-        args = [_per_kernel(arg) for arg in node.args]
+        args = [_per_kernel(arg, partners) for arg in node.args]
         if node.name in KERNEL_AGGREGATES and len(args) == 1:
             return args[0]
         return FunctionCallNode(node.name, args)
     if isinstance(node, BinaryOpNode):
-        return BinaryOpNode(node.op, _per_kernel(node.left), _per_kernel(node.right))
+        return BinaryOpNode(
+            node.op, _per_kernel(node.left, partners), _per_kernel(node.right, partners)
+        )
     if isinstance(node, UnaryOpNode):
-        return UnaryOpNode(node.op, _per_kernel(node.operand))
+        return UnaryOpNode(node.op, _per_kernel(node.operand, partners))
+    if isinstance(node, VariableNode):
+        partner = partners.get(node.name.lstrip("$"))
+        return VariableNode(f"${partner}") if partner else node
     return node
 
 
