@@ -9,19 +9,13 @@ import textwrap
 import pytest
 from format_yaml import check_file
 
-# A panel with one equation that needs formatting and one equation
-# with a dangling operator.
-PANEL_WITH_BROKEN_EQUATION = textwrap.dedent("""\
-    Panel Config:
-      id: 400
-      data source:
-      - metric_table:
-          id: 401
-          metric:
-            L2 Hit:
-              value: SUM(TCC_HIT_sum * 2)
-            AI LDS:
-              value: SUM(SQ_INSTS_VALU_MFMA_MOPS_F64 * 512 + ) / SUM(SQ_LDS_IDX_ACTIVE)
+# A metric library file with one formula that needs formatting and one formula with a
+# dangling operator.
+LIBRARY_WITH_BROKEN_FORMULA = textwrap.dedent("""\
+    l2.hit:
+      formula: SUM(TCC_HIT_sum * 2)
+    lds.ai:
+      formula: SUM(SQ_INSTS_VALU_MFMA_MOPS_F64 * 512 + ) / SUM(SQ_LDS_IDX_ACTIVE)
 """)
 
 
@@ -34,26 +28,20 @@ def write_config(tmp_path, relative_path, text):
 
 def test_unparseable_equation_reported(tmp_path):
     """A broken equation is reported by key; the other equations are still fixed."""
-    panel = write_config(
-        tmp_path,
-        "analysis_configs/gfx942/0400_roofline.yaml",
-        PANEL_WITH_BROKEN_EQUATION,
+    path = write_config(
+        tmp_path, "metric_library/gfx942/l2.yaml", LIBRARY_WITH_BROKEN_FORMULA
     )
 
-    is_valid, issues = check_file(panel, fix=True)
+    is_valid, issues = check_file(path, fix=True)
 
     assert not is_valid
-    assert issues[0].startswith(
-        "  Panel Config.data source[0].metric_table.metric.AI LDS.value: "
-        "cannot parse equation: "
-    )
-    content = panel.read_text(encoding="utf-8")
-    assert "value: 2 * SUM(TCC_HIT_sum)" in content
+    assert issues[0].startswith("  lds.ai.formula: cannot parse equation: ")
+    content = path.read_text(encoding="utf-8")
+    assert "formula: 2 * SUM(TCC_HIT_sum)" in content
     assert "MOPS_F64 * 512 + ) /" in content
 
 
 def test_unformatted_library_formula_reported(tmp_path):
-    """A metric library formula is checked like a panel equation."""
     path = write_config(
         tmp_path,
         "metric_library/gfx908/l2.yaml",

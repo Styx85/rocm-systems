@@ -9,7 +9,6 @@ import pytest
 import yaml
 from format_yaml import extract_metric_equations
 
-import config
 from rocprof_compute_soc.metric_library.loader import default_metric_library_dir
 from utils.equation_format import (
     CHANNEL_PLACEHOLDER,
@@ -48,11 +47,9 @@ FACTORING_CASES = [
 
 
 def real_equations() -> Set[str]:
-    """Return every equation of the panel configs and the metric library."""
-    files = list(config.analysis_configs_dir.glob("gfx*/*.yaml"))
-    files += default_metric_library_dir().glob("gfx*/*.yaml")
+    """Return every equation of the metric library, collectables included."""
     equations = set()
-    for path in files:
+    for path in default_metric_library_dir().glob("gfx*/*.yaml"):
         document = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
         equations.update(equation for _, equation in extract_metric_equations(document))
     return equations
