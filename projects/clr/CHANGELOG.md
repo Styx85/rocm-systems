@@ -13,6 +13,9 @@ Full documentation for HIP is available at [rocm.docs.amd.com](https://rocm.docs
       * `hipMemcpy3DWithAttributesAsync` performs a single asynchronous 3D copy described by a
         `hipMemcpy3DBatchOp` structure, without requiring the caller to build the operation list
         that `hipMemcpy3DBatchAsync` takes.
+      * `hipArrayGetPlane` gets a single format plane of a multiplanar HIP array. AMD devices do
+        not support multiplanar arrays, so it validates its arguments and returns
+        `hipErrorNotSupported`.
 
 ### Resolved issues
 
