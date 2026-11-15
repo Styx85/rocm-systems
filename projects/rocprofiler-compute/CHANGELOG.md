@@ -142,6 +142,8 @@ Full documentation for ROCm Compute Profiler is available at [https://rocm.docs.
 
 * PC sampling now writes disassembly only for dispatched kernels, so profiling output is much smaller.
 
+* Profiling on MI200 collects two fewer counters, which saves one profiling pass.
+
 ### Resolved issues
 
 * Fixed a `KeyError: 'title'` when combining `analyze --list-stats` with `--output-format csv` or `--output-format db`. These unsupported combinations now report a clear error during option validation.
