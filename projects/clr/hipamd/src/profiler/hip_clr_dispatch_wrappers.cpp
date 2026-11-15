@@ -5071,6 +5071,15 @@ static hipError_t hipExtMemcpyBatchAsyncLayer(void** dsts, void** srcs, size_t* 
   return _r;
 }
 
+// api_id = 515
+static hipError_t hipArrayGetPlaneLayer(hipArray_t* pPlaneArray, hipArray_t hArray,
+                                        unsigned int planeIdx) {
+  auto* _rec = HipGetActiveRecordExt(515u);
+  auto _r = g_next.hipArrayGetPlane_fn(pPlaneArray, hArray, planeIdx);
+  _rec->end_ns = NowNs();
+  return _r;
+}
+
 // API name table — indexed by api_id (same order as UpdateDispatchTable).
 const char* const kHipApiNamesExt[] = {
   "hipApiName",
@@ -5588,8 +5597,9 @@ const char* const kHipApiNamesExt[] = {
   "hipLibraryGetGlobal",
   "hipLibraryGetManaged",
   "hipExtMemcpyBatchAsync",
+  "hipArrayGetPlane",
 };
-const size_t kHipApiNamesCountExt = 515;
+const size_t kHipApiNamesCountExt = 516;
 
 #include <cstring>
 
@@ -5603,6 +5613,7 @@ void HipProfilerBuildWrapperTableExt(HipDispatchTable* tbl) {
   g_wrapper_tbl.hipArrayDestroy_fn = hipArrayDestroyLayer;
   g_wrapper_tbl.hipArrayGetDescriptor_fn = hipArrayGetDescriptorLayer;
   g_wrapper_tbl.hipArrayGetInfo_fn = hipArrayGetInfoLayer;
+  g_wrapper_tbl.hipArrayGetPlane_fn = hipArrayGetPlaneLayer;
   g_wrapper_tbl.hipBindTexture_fn = hipBindTextureLayer;
   g_wrapper_tbl.hipBindTexture2D_fn = hipBindTexture2DLayer;
   g_wrapper_tbl.hipBindTextureToArray_fn = hipBindTextureToArrayLayer;
