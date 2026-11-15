@@ -6,10 +6,12 @@
 
 For every arch in METRIC_LIBRARY_PARENT_ARCH, check that:
 
-- its view files are named by panel id, one per panel, have known fields, render
-  types and CLI styles, and the views tree holds only metric library arch directories;
+- its view files are named by panel id, one per panel, have known fields and render
+  types, every row names its metric or its columns' metrics (with a label), and the
+  views tree holds only metric library arch directories;
 - every metric a view shows is in the arch's metric library, with a measured peak where
-  the row asks for one.
+  the row asks for one, and a row whose table shows Min, Max or Std Dev reads no
+  summed collectable without its per-dispatch partner.
 
 test_analysis_views_sync.py, next to the metric library sync test, checks that the
 views keep the analysis configs' structure.
