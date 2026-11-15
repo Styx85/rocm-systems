@@ -854,6 +854,7 @@ NOOP_PLAYBACK_APIS: Set[str] = {
     "hipArray3DGetDescriptor",
     "hipArrayGetInfo",
     "hipArrayDestroy",
+    "hipArrayGetPlane",
     "hipGetChannelDesc",
     "hipCreateTextureObject",
     "hipDestroyTextureObject",
