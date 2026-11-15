@@ -94,8 +94,13 @@
  * those events as the wrong API.
  * v13: a hipGraphLaunch or hipGraphLaunch_spt event carries pinned host
  * snapshot records after its fixed fields. A v12 reader would launch the
- * graph without restoring them. */
-#define HRR_VERSION ((uint16_t)13u)
+ * graph without restoring them.
+ * v14: hipArrayGetPlane was appended to HipDispatchTable, and regenerating
+ * also picked up hipMemcpyWithAttributesAsync and
+ * hipMemcpy3DWithAttributesAsync, which were already in the dispatch table
+ * but missing from the generated sources. The compiler API IDs shift up by
+ * three, so a v13 reader would decode those events as the wrong API. */
+#define HRR_VERSION ((uint16_t)14u)
 
 /* Written once at byte 0 of events.bin. */
 #pragma pack(push, 1)
