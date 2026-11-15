@@ -233,8 +233,8 @@ def view_schema_errors(documents: Dict[str, Any]) -> List[str]:
     path.
 
     Checks the file names and that each panel id has one file, the fields each level
-    may have, render types and CLI styles, that a row names its metric or its columns'
-    metrics, and that a row with columns' metrics has a label.
+    may have, render types, that a row names its metric or its columns' metrics, and
+    that a row with columns' metrics has a label.
     """
     errors = _file_name_errors(list(documents))
     for source, document in documents.items():
