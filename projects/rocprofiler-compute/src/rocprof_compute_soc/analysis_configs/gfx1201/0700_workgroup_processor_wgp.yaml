@@ -244,7 +244,7 @@ Panel Config:
         max: Max
         unit: Unit
       metric:
-        L1I Hits per Request:
+        L1I Hit Rate:
           avg: 100 * SUM(SQC_ICACHE_HITS_sum) / SUM(SQC_ICACHE_REQ_sum)
           min: MIN(100 * SQC_ICACHE_HITS_sum / SQC_ICACHE_REQ_sum)
           max: MAX(100 * SQC_ICACHE_HITS_sum / SQC_ICACHE_REQ_sum)
@@ -259,13 +259,13 @@ Panel Config:
         max: Max
         unit: Unit
       metric:
-        sL1D Hits per Request:
+        sL1D Hit Rate:
           avg: 100 * SUM(SQC_DCACHE_HITS_sum) / SUM(SQC_DCACHE_REQ_sum)
           min: MIN(100 * SQC_DCACHE_HITS_sum / SQC_DCACHE_REQ_sum)
           max: MAX(100 * SQC_DCACHE_HITS_sum / SQC_DCACHE_REQ_sum)
           unit: Percent
   metrics_description:
-    sL1D Hits per Request: >-
+    sL1D Hit Rate: >-
       Percentage of scalar data cache accesses that hit. High hit rates indicate
       efficient reuse of constant and uniform data. Low rates may suggest excessive
       unique constant data or poor temporal locality.
@@ -275,7 +275,7 @@ Panel Config:
       Total wavefronts dispatched.
     Grid Size: >-
       Number of work-items in the dispatch grid, from dispatch metadata.
-    L1I Hits per Request: >-
+    L1I Hit Rate: >-
       Percentage of instruction cache accesses that hit. High hit rates are essential
       for sustained instruction throughput. Low rates may indicate large kernels or
       divergent branches causing instruction cache thrashing.

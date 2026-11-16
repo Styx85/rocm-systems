@@ -1296,11 +1296,11 @@ vL1D cache access metrics:
     rst: Calculated as the average number of cycles that the vL1D cache took to issue and receive acknowledgement of a write request to the :doc:`L2 Cache <l2-cache>`. This number also includes requests for atomics without return values.
     unit: Cycles per Normalization Unit
 L1 Unified Translation Cache (UTCL1):
-  vL1D Inflight Requests:
+  UTCL1 Inflight Requests:
     plain: The sum of inflight client-to-UTCL1 translation requests per cycle, per normalization unit. Measures the average number of translation requests actively being processed by the UTCL1 at any given time.
     rst: The sum of inflight client-to-UTCL1 translation requests per cycle, per normalization unit. Measures the average number of translation requests actively being processed by the UTCL1 at any given time.
     unit: Requests per Normalization Unit
-  vL1D Misses under Translation Miss:
+  UTCL1 Misses under Translation Miss:
     plain: The number of translation requests that missed in the UTCL1 while another miss for the same translation was already being processed, per normalization unit. These are secondary misses that occur before the first miss completes.
     rst: The number of translation requests that missed in the UTCL1 while another miss for the same translation was already being processed, per normalization unit. These are secondary misses that occur before the first miss completes.
     unit: Requests per Normalization Unit

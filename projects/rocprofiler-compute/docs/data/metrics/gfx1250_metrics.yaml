@@ -167,7 +167,7 @@ Memory chart - Scalar Data Cache:
   Dcache Request Stall Rate:
     rst: Percentage of WGP cycles the SQC scalar cache is stalled.
     unit: Percent
-  Dcache Request Bandwidth:
+  sL1D Load Bandwidth:
     rst: Total Scalar Data Cache request bandwidth.
     unit: Bytes/s
   Dcache-GL1 Read Bandwidth:
@@ -241,10 +241,10 @@ Memory chart - LDS (Local Data Share):
   TDM Store Bandwidth:
     rst: Total TDM store bandwidth.
     unit: Bytes/s
-  TDM Async Load Instructions:
+  TDM Async Load Requests:
     rst: Total TDM load requests.
     unit: Requests per Normalization Unit
-  TDM Async Store Instructions:
+  TDM Async Store Requests:
     rst: Total TDM store requests.
     unit: Requests per Normalization Unit
   LDS Utilization - Load:
@@ -827,7 +827,7 @@ WGP Scalar Data Cache:
   Dcache Hit Rate:
     rst: Scalar Data Cache hit rate.
     unit: Percent
-  Dcache Request Bytes:
+  sL1D Load Bytes:
     rst: Total Scalar Data Cache bandwidth.
     unit: Bytes per Normalization Unit
 WGP SQC-GL1 Interface:
@@ -899,11 +899,11 @@ Shader-TXA Requests - TDM:
   TDM Instructions:
     rst: Total TDM instructions processed by TXA.
     unit: Count per Normalization Unit
-  TDM Async Load Instructions:
-    rst: Number of TDM async load instructions processed by TXA.
+  TDM Async Load Requests:
+    rst: Number of TDM async load requests processed by TXA.
     unit: Count per Normalization Unit
-  TDM Async Store Instructions:
-    rst: Number of TDM async store instructions processed by TXA.
+  TDM Async Store Requests:
+    rst: Number of TDM async store requests processed by TXA.
     unit: Count per Normalization Unit
   TDM Async Cluster Load Instructions:
     rst: Number of TDM async cluster load instructions processed by TXA.

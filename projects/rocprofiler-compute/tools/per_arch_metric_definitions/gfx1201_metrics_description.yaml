@@ -57,11 +57,11 @@ Memory chart - Scalar Data Cache:
     plain: Scalar data cache requests after bank serialization, normalized by the chosen unit.
     rst: Scalar data cache requests after bank serialization, normalized by the chosen unit.
     unit: Requests per Normalization Unit
-  sL1D Hits per Request:
+  sL1D Hit Rate:
     plain: Percentage of scalar data cache accesses that hit in cache. High hit rates indicate efficient reuse of constant and uniform data. Low hit rates may indicate excessive unique constant data or poor temporal locality.
     rst: Percentage of scalar data cache accesses that hit in cache. High hit rates indicate efficient reuse of constant and uniform data. Low hit rates may indicate excessive unique constant data or poor temporal locality.
     unit: Percent
-  Dcache Request Bandwidth:
+  sL1D Load Bandwidth:
     plain: Bytes loaded by scalar memory instructions, from the dwords each instruction loads. Bounds-check reductions are ignored.
     rst: Bytes loaded by scalar memory instructions, from the dwords each instruction loads. Bounds-check reductions are ignored.
     unit: Bytes/s
@@ -186,7 +186,7 @@ Wave Dispatch Statistics:
     rst: Average wavefronts launched per busy cycle.
     unit: Wavefronts per Cycle
 WGP Scalar Data Cache:
-  sL1D Hits per Request:
+  sL1D Hit Rate:
     plain: Percentage of scalar data cache accesses that hit. High hit rates indicate efficient reuse of constant and uniform data. Low rates may suggest excessive unique constant data or poor temporal locality.
     rst: Percentage of scalar data cache accesses that hit. High hit rates indicate efficient reuse of constant and uniform data. Low rates may suggest excessive unique constant data or poor temporal locality.
     unit: Percent
@@ -225,7 +225,7 @@ WGP Wavefront Launch Stats:
     rst: Number of work-items per workgroup, from dispatch metadata.
     unit: Work-items
 WGP Instruction Cache:
-  L1I Hits per Request:
+  L1I Hit Rate:
     plain: Percentage of instruction cache accesses that hit. High hit rates are essential for sustained instruction throughput. Low rates may indicate large kernels or divergent branches causing instruction cache thrashing.
     rst: Percentage of instruction cache accesses that hit. High hit rates are essential for sustained instruction throughput. Low rates may indicate large kernels or divergent branches causing instruction cache thrashing.
     unit: Percent

@@ -164,12 +164,12 @@ Panel Config:
           min: MIN(TX_VCA_TENSOR_DMA_WAVEFRONT_sum / $denom)
           max: MAX(TX_VCA_TENSOR_DMA_WAVEFRONT_sum / $denom)
           unit: (Count + $normUnit)
-        TDM Async Load Instructions:
+        TDM Async Load Requests:
           avg: SUM(TX_VCA_TENSOR_ASYNC_LOAD_DMA_REQUEST_sum) / SUM($denom)
           min: MIN(TX_VCA_TENSOR_ASYNC_LOAD_DMA_REQUEST_sum / $denom)
           max: MAX(TX_VCA_TENSOR_ASYNC_LOAD_DMA_REQUEST_sum / $denom)
           unit: (Count + $normUnit)
-        TDM Async Store Instructions:
+        TDM Async Store Requests:
           avg: SUM(TX_VCA_TENSOR_ASYNC_STORE_DMA_REQUEST_sum) / SUM($denom)
           min: MIN(TX_VCA_TENSOR_ASYNC_STORE_DMA_REQUEST_sum / $denom)
           max: MAX(TX_VCA_TENSOR_ASYNC_STORE_DMA_REQUEST_sum / $denom)
@@ -395,11 +395,11 @@ Panel Config:
     TDM Instructions: >-
       Total TDM instructions processed by TXA.
 
-    TDM Async Load Instructions: >-
-      Number of TDM async load instructions processed by TXA.
+    TDM Async Load Requests: >-
+      Number of TDM async load requests processed by TXA.
 
-    TDM Async Store Instructions: >-
-      Number of TDM async store instructions processed by TXA.
+    TDM Async Store Requests: >-
+      Number of TDM async store requests processed by TXA.
 
     TDM Async Cluster Load Instructions: >-
       Number of TDM async cluster load instructions processed by TXA.

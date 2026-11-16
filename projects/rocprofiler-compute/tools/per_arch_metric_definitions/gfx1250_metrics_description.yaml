@@ -222,7 +222,7 @@ Memory chart - Scalar Data Cache:
     plain: Percentage of WGP cycles the SQC scalar cache is stalled.
     rst: Percentage of WGP cycles the SQC scalar cache is stalled.
     unit: Percent
-  Dcache Request Bandwidth:
+  sL1D Load Bandwidth:
     plain: Total Scalar Data Cache request bandwidth.
     rst: Total Scalar Data Cache request bandwidth.
     unit: Bytes/s
@@ -320,11 +320,11 @@ Memory chart - LDS (Local Data Share):
     plain: Total TDM store bandwidth.
     rst: Total TDM store bandwidth.
     unit: Bytes/s
-  TDM Async Load Instructions:
+  TDM Async Load Requests:
     plain: Total TDM load requests.
     rst: Total TDM load requests.
     unit: Requests per Normalization Unit
-  TDM Async Store Instructions:
+  TDM Async Store Requests:
     plain: Total TDM store requests.
     rst: Total TDM store requests.
     unit: Requests per Normalization Unit
@@ -1092,7 +1092,7 @@ WGP Scalar Data Cache:
     plain: Scalar Data Cache hit rate.
     rst: Scalar Data Cache hit rate.
     unit: Percent
-  Dcache Request Bytes:
+  sL1D Load Bytes:
     plain: Total Scalar Data Cache bandwidth.
     rst: Total Scalar Data Cache bandwidth.
     unit: Bytes per Normalization Unit
@@ -1186,13 +1186,13 @@ Shader-TXA Requests - TDM:
     plain: Total TDM instructions processed by TXA.
     rst: Total TDM instructions processed by TXA.
     unit: Count per Normalization Unit
-  TDM Async Load Instructions:
-    plain: Number of TDM async load instructions processed by TXA.
-    rst: Number of TDM async load instructions processed by TXA.
+  TDM Async Load Requests:
+    plain: Number of TDM async load requests processed by TXA.
+    rst: Number of TDM async load requests processed by TXA.
     unit: Count per Normalization Unit
-  TDM Async Store Instructions:
-    plain: Number of TDM async store instructions processed by TXA.
-    rst: Number of TDM async store instructions processed by TXA.
+  TDM Async Store Requests:
+    plain: Number of TDM async store requests processed by TXA.
+    rst: Number of TDM async store requests processed by TXA.
     unit: Count per Normalization Unit
   TDM Async Cluster Load Instructions:
     plain: Number of TDM async cluster load instructions processed by TXA.
