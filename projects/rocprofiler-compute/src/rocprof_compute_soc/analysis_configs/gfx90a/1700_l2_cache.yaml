@@ -58,7 +58,7 @@ Panel Config:
           min: 100 * MIN(TCC_EA_RD_UNCACHED_32B_sum / TCC_EA_RDREQ_sum)
           max: 100 * MAX(TCC_EA_RD_UNCACHED_32B_sum / TCC_EA_RDREQ_sum)
           unit: Percent
-        Write and Atomic BW:
+        Write and Atomic Bytes:
           avg: SUM(TCC_EA_WRREQ_64B_sum * 64 + (TCC_EA_WRREQ_sum - TCC_EA_WRREQ_64B_sum) * 32) / SUM($denom)
           min: MIN((TCC_EA_WRREQ_64B_sum * 64 + (TCC_EA_WRREQ_sum - TCC_EA_WRREQ_64B_sum) * 32) / $denom)
           max: MAX((TCC_EA_WRREQ_64B_sum * 64 + (TCC_EA_WRREQ_sum - TCC_EA_WRREQ_64B_sum) * 32) / $denom)
@@ -336,7 +336,7 @@ Panel Config:
       consider the size of the request (i.e., 32B and 64B requests are both counted
       as a single request), so this metric only approximates the percent of the L2-Fabric
       read bandwidth directed to an uncached memory location.
-    Write and Atomic BW: The total number of bytes written by the L2 over Infinity
+    Write and Atomic Bytes: The total number of bytes written by the L2 over Infinity
       Fabric by write and atomic operations divided by total duration. Note that on
       current CDNA accelerators, such as the MI2XX, requests are only considered atomic
       by Infinity Fabric if they are targeted at non-write-cacheable memory, for example,

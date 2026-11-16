@@ -155,7 +155,7 @@ Roofline Performance Rates:
     plain: Achieved bandwidth for Local Data Share memory operations.
     rst: Achieved bandwidth for Local Data Share memory operations.
     unit: Bytes/s
-  L2 to Memory BW:
+  Memory Bandwidth:
     plain: Bandwidth of GL2C/EA read and write requests leaving L2 toward memory, compared with the measured VRAM bandwidth (VRAMBw column of roofline.csv). Counts 32-byte granules from GL2C_EA_RDREQ_DRAM_32B (PERF_SEL 0xa7) and GL2C_EA_WRREQ_DRAM_32B (PERF_SEL 0xa8). The unsized EA_RDREQ_DRAM and EA_WRREQ_DRAM counters (0xa5 and 0xa6) mix 32-byte through 128-byte requests, so a fixed 256 bytes per request would overstate them. It includes requests the Infinity Cache serves. The counters cannot separate them, so this can be higher than true VRAM traffic and can exceed the measured VRAM peak.
     rst: Bandwidth of GL2C/EA read and write requests leaving L2 toward memory, compared with the measured VRAM bandwidth (VRAMBw column of roofline.csv). Counts 32-byte granules from GL2C_EA_RDREQ_DRAM_32B (PERF_SEL 0xa7) and GL2C_EA_WRREQ_DRAM_32B (PERF_SEL 0xa8). The unsized EA_RDREQ_DRAM and EA_WRREQ_DRAM counters (0xa5 and 0xa6) mix 32-byte through 128-byte requests, so a fixed 256 bytes per request would overstate them. It includes requests the Infinity Cache serves. The counters cannot separate them, so this can be higher than true VRAM traffic and can exceed the measured VRAM peak.
     unit: Bytes/s
@@ -361,11 +361,11 @@ GL2 Cache Request Statistics:
     plain: Number of atomic memory operations processed by the GL2 cache. Atomics provide thread-safe memory access but may serialize at contended addresses. High counts may impact performance.
     rst: Number of atomic memory operations processed by the GL2 cache. Atomics provide thread-safe memory access but may serialize at contended addresses. High counts may impact performance.
     unit: Count per Normalization Unit
-  EA Read Requests (Memory):
+  EA Read Requests (DRAM):
     plain: L2 read requests over EA destined for memory. Infinity Cache can serve these requests before they reach VRAM.
     rst: L2 read requests over EA destined for memory. Infinity Cache can serve these requests before they reach VRAM.
     unit: Count per Normalization Unit
-  EA Write Requests (Memory):
+  EA Write Requests (DRAM):
     plain: L2 write requests over EA destined for memory. Infinity Cache can absorb these requests before they reach VRAM.
     rst: L2 write requests over EA destined for memory. Infinity Cache can absorb these requests before they reach VRAM.
     unit: Count per Normalization Unit

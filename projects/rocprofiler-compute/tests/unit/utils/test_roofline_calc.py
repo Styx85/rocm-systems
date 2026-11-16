@@ -11,8 +11,10 @@ import numpy as np
 import pandas as pd
 import pytest
 
+import config
 from utils import schema
 from utils.roofline_calc import (
+    _ROOFLINE_POINTS_TABLE_ID,
     XMAX_DEFAULT,
     GraphPoints,
     _extract_ai_metrics,
@@ -23,6 +25,7 @@ from utils.roofline_calc import (
     roofline_mem_levels,
     sanitize_ai_value,
 )
+from utils.utils_common import load_panel_configs
 
 
 def assert_graph_points_positive_finite(
@@ -275,6 +278,29 @@ def test_extract_ai_metrics_reads_the_vram_point_into_its_own_field() -> None:
     )
 
     assert ai_metrics["ai_vram"] == 3.5
+
+
+def test_extract_ai_metrics_reads_every_plot_point_row() -> None:
+    """Each AI row of every arch's Roofline Plot Points table fills its own plot point
+    field, for example gfx1250's AI L0 and AI L2."""
+    unread = []
+    for arch_dir in sorted(config.analysis_configs_dir.glob("gfx*")):
+        tables = [
+            source["metric_table"]
+            for panel in load_panel_configs([str(arch_dir)]).values()
+            for source in panel["data source"]
+            if source.get("metric_table", {}).get("id") == _ROOFLINE_POINTS_TABLE_ID
+        ]
+        ai_rows = [name for table in tables for name in table["metric"]]
+        ai_rows = [name for name in ai_rows if name.startswith("AI ")]
+        ai_metrics = _extract_ai_metrics(
+            pd.DataFrame({"Metric": ai_rows, "Value": [1.0] * len(ai_rows)})
+        )
+        filled = [field for field, value in ai_metrics.items() if value == 1.0]
+        if len(filled) != len(ai_rows):
+            unread.append((arch_dir.name, ai_rows, filled))
+
+    assert not unread
 
 
 ##############################################################################

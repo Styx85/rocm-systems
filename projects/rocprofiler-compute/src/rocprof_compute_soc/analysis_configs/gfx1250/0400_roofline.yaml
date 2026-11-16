@@ -125,10 +125,10 @@ Panel Config:
         AI HBM:
           value: SUM($sp_flops + $wmma_flops) / SUM($hbm_bytes)
           unit: FLOPs/Byte
-        AI GL2:
+        AI L2:
           value: SUM($sp_flops + $wmma_flops) / SUM($gl2_bytes)
           unit: FLOPs/Byte
-        AI GL0:
+        AI L0:
           value: SUM($sp_flops + $wmma_flops) / SUM($gl0_bytes)
           unit: FLOPs/Byte
         Performance (GFLOPs):
@@ -206,10 +206,10 @@ Panel Config:
     AI HBM: >-
       Arithmetic intensity relative to HBM bandwidth.
 
-    AI GL2: >-
+    AI L2: >-
       Arithmetic intensity relative to GL1 bandwidth.
 
-    AI GL0: >-
+    AI L0: >-
       Arithmetic intensity relative to GL0 data bandwidth.
 
     Performance (GFLOPs): >-
