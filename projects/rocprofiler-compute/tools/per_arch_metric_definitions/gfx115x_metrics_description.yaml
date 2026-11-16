@@ -226,8 +226,8 @@ Memory chart - Workgroup Processors (WGPs):
     rst: 'The number of architected vector general-purpose registers allocated per wavefront. Note: this may not exactly match the number of VGPRs requested by the compiler due to allocation granularity.'
     unit: Registers
   SGPR:
-    plain: 'The number of scalar general-purpose registers allocated per wavefront. Note: this may not exactly match the number of SGPRs requested by the compiler due to allocation granularity.'
-    rst: 'The number of scalar general-purpose registers allocated per wavefront. Note: this may not exactly match the number of SGPRs requested by the compiler due to allocation granularity.'
+    plain: The number of scalar general-purpose registers allocated per wavefront. On this architecture every wavefront gets 128.
+    rst: The number of scalar general-purpose registers allocated per wavefront. On this architecture every wavefront gets 128.
     unit: Registers
   LDS Allocation:
     plain: 'The number of bytes of LDS memory (or, shared memory) allocated per workgroup. Note: This may also be larger than what was requested at compile time due to both allocation granularity and dynamic per-dispatch LDS allocations.'
@@ -388,8 +388,8 @@ Wavefront Launch Stats:
     rst: 'The number of architected vector general-purpose registers allocated per wavefront. Note: this may not exactly match the number of VGPRs requested by the compiler due to allocation granularity.'
     unit: Registers
   SGPRs:
-    plain: 'The number of scalar general-purpose registers allocated per wavefront. Note: this may not exactly match the number of SGPRs requested by the compiler due to allocation granularity.'
-    rst: 'The number of scalar general-purpose registers allocated per wavefront. Note: this may not exactly match the number of SGPRs requested by the compiler due to allocation granularity.'
+    plain: The number of scalar general-purpose registers allocated per wavefront. On this architecture every wavefront gets 128.
+    rst: The number of scalar general-purpose registers allocated per wavefront. On this architecture every wavefront gets 128.
     unit: Registers
   LDS Allocation:
     plain: 'The number of bytes of LDS memory (or, shared memory) allocated per workgroup. Note: This may also be larger than what was requested at compile time due to both allocation granularity and dynamic per-dispatch LDS allocations.'

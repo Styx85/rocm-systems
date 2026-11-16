@@ -350,7 +350,7 @@ Memory chart - EA to HBM:
     rst: Total write bandwidth to peer GPU HBM via Infinity Fabric.
     unit: GB/s
   EA Stalled by SDP:
-    rst: Percentage of EA-busy cycles where the EA is stalled by the downstream memory pipeline (SDP).
+    rst: Percentage of EA-busy cycles where the EA front end has a request ready but the EA back end is not ready to send it to the Scalable Data SOC (SDP).
     unit: Percent
   Outstanding Requests:
     rst: Time-averaged total number of in-flight requests from EA to the SDP memory fabric. Higher outstanding counts hide memory latency by keeping HBM busy. Very high outstanding with EA stalls indicates request queues are backed up and the downstream memory controllers cannot accept requests fast enough.
@@ -363,7 +363,7 @@ Memory chart - Workgroup Processors (WGPs):
     rst: 'The number of architected vector general-purpose registers allocated per wavefront. Note: this may not exactly match the number of VGPRs requested by the compiler due to allocation granularity.'
     unit: Registers
   SGPR:
-    rst: 'The number of scalar general-purpose registers allocated per wavefront. Note: this may not exactly match the number of SGPRs requested by the compiler due to allocation granularity.'
+    rst: The number of scalar general-purpose registers allocated per wavefront. On this architecture every wavefront gets 128.
     unit: Registers
   LDS Allocation:
     rst: 'The number of bytes of LDS memory (or, shared memory) allocated per :ref:`workgroup <desc-workgroup>`. Note: This may also be larger than what was requested at compile time due to both allocation granularity and dynamic per-dispatch LDS allocations.'
@@ -579,7 +579,7 @@ WGP Wavefront Launch Stats:
     rst: Number of accumulation VGPRs allocated per wavefront.
     unit: Registers
   SGPRs:
-    rst: 'The number of scalar general-purpose registers allocated per wavefront. Note: this may not exactly match the number of SGPRs requested by the compiler due to allocation granularity.'
+    rst: The number of scalar general-purpose registers allocated per wavefront. On this architecture every wavefront gets 128.
     unit: Registers
   LDS Allocation:
     rst: 'The number of bytes of LDS memory (or, shared memory) allocated per workgroup. Note: This may also be larger than what was requested at compile time due to both allocation granularity and dynamic per-dispatch LDS allocations.'
@@ -1597,31 +1597,31 @@ EA Traffic Bandwidth:
     unit: GB/s
 EA-SDP Interface - Outstanding Requests:
   Outstanding Requests:
-    rst: Average number of in-flight requests from EA to SDP.
+    rst: Average number of in-flight requests from EA to the Scalable Data SOC (SDP).
     unit: Requests
   Outstanding Requests - IO Read:
-    rst: Average in-flight PCI-E and other IO read requests from EA to SDP.
+    rst: Average in-flight PCI-E and other IO read requests from EA to the Scalable Data SOC (SDP).
     unit: Requests
   Outstanding Requests - IO Write:
-    rst: Average in-flight PCI-E and other IO write requests from EA to SDP.
+    rst: Average in-flight PCI-E and other IO write requests from EA to the Scalable Data SOC (SDP).
     unit: Requests
   Outstanding Requests - DRAM Read:
-    rst: Average in-flight HBM read requests from EA to SDP.
+    rst: Average in-flight HBM read requests from EA to the Scalable Data SOC (SDP).
     unit: Requests
   Outstanding Requests - DRAM Write:
-    rst: Average in-flight HBM write requests from EA to SDP.
+    rst: Average in-flight HBM write requests from EA to the Scalable Data SOC (SDP).
     unit: Requests
   Outstanding Requests - GMI Read:
-    rst: Average in-flight GMI read requests from EA to SDP.
+    rst: Average in-flight GMI read requests from EA to the Scalable Data SOC (SDP).
     unit: Requests
   Outstanding Requests - GMI Write:
-    rst: Average in-flight GMI write requests from EA to SDP.
+    rst: Average in-flight GMI write requests from EA to the Scalable Data SOC (SDP).
     unit: Requests
   Outstanding Requests - HDM Read:
-    rst: Average in-flight HDM read requests from EA to SDP.
+    rst: Average in-flight HDM read requests from EA to the Scalable Data SOC (SDP).
     unit: Requests
   Outstanding Requests - HDM Write:
-    rst: Average in-flight HDM write requests from EA to SDP.
+    rst: Average in-flight HDM write requests from EA to the Scalable Data SOC (SDP).
     unit: Requests
   Outstanding Requests - Probe Request:
     rst: Time-averaged number of in-flight cache coherence probe requests from EA.
@@ -1631,22 +1631,22 @@ EA-SDP Interface - Outstanding Requests:
     unit: Requests
 EA-SDP Interface - Stalls:
   EA Stalled by SDP:
-    rst: Percentage of EA-busy cycles where the EA is stalled by the downstream memory pipeline (SDP).
+    rst: Percentage of EA-busy cycles where the EA front end has a request ready but the EA back end is not ready to send it to the Scalable Data SOC (SDP).
     unit: Percent
   EA Stalled by SDP - IO Read:
-    rst: Percentage of EA-busy cycles the EA is stalled by downstream memory pipeline on PCI-E and other IO read path.
+    rst: Percentage of EA-busy cycles where the IO read front end is ready but the EA back end for IO reads is not ready to send to the Scalable Data SOC (SDP).
     unit: Percent
   EA Stalled by SDP - IO Write:
-    rst: Percentage of EA-busy cycles the EA is stalled by downstream memory pipeline on PCI-E and other IO write path.
+    rst: Percentage of EA-busy cycles where the IO write front end is ready but the EA back end for IO writes is not ready to send to the Scalable Data SOC (SDP).
     unit: Percent
   EA Stalled by SDP - DRAM:
-    rst: Percentage of EA-busy cycles the EA is stalled by downstream memory pipeline on DRAM path.
+    rst: Percentage of EA-busy cycles where the DRAM front end is ready but the EA back end for DRAM reads and writes is not ready to send to the Scalable Data SOC (SDP).
     unit: Percent
   EA Stalled by SDP - GMI:
-    rst: Percentage of EA-busy cycles the EA is stalled by downstream memory pipeline on GMI path.
+    rst: Percentage of EA-busy cycles where the GMI front end is ready but the EA back end for GMI reads and writes is not ready to send to the Scalable Data SOC (SDP).
     unit: Percent
   EA Stalled by SDP - HDM:
-    rst: Percentage of EA-busy cycles the EA is stalled by downstream memory pipeline on HDM path.
+    rst: Percentage of EA-busy cycles where the HDM front end is ready but the EA back end for HDM reads and writes is not ready to send to the Scalable Data SOC (SDP).
     unit: Percent
 CHC Utilization:
   Utilization:

@@ -119,8 +119,8 @@ Memory chart - Workgroup Processors (WGPs):
     rst: Architectural vector general-purpose registers allocated for the kernel, from dispatch metadata. Allocation granularity can increase the reported value above the compiler's request.
     unit: Registers
   SGPR:
-    plain: Scalar general-purpose registers allocated for the kernel, from dispatch metadata. Allocation granularity can increase the reported value above the compiler's request.
-    rst: Scalar general-purpose registers allocated for the kernel, from dispatch metadata. Allocation granularity can increase the reported value above the compiler's request.
+    plain: The number of scalar general-purpose registers allocated per wavefront. On this architecture every wavefront gets 128.
+    rst: The number of scalar general-purpose registers allocated per wavefront. On this architecture every wavefront gets 128.
     unit: Registers
   LDS Allocation:
     plain: 'The number of bytes of LDS memory (or, shared memory) allocated per workgroup. Note: This may also be larger than what was requested at compile time due to both allocation granularity and dynamic per-dispatch LDS allocations.'
@@ -204,8 +204,8 @@ WGP Wavefront Launch Stats:
     rst: Architectural vector general-purpose registers allocated for the kernel, from dispatch metadata. Allocation granularity can increase the reported value above the compiler's request.
     unit: Registers
   SGPRs:
-    plain: Scalar general-purpose registers allocated for the kernel, from dispatch metadata. Allocation granularity can increase the reported value above the compiler's request.
-    rst: Scalar general-purpose registers allocated for the kernel, from dispatch metadata. Allocation granularity can increase the reported value above the compiler's request.
+    plain: The number of scalar general-purpose registers allocated per wavefront. On this architecture every wavefront gets 128.
+    rst: The number of scalar general-purpose registers allocated per wavefront. On this architecture every wavefront gets 128.
     unit: Registers
   LDS Allocation:
     plain: 'The number of bytes of LDS memory (or, shared memory) allocated per workgroup. Note: This may also be larger than what was requested at compile time due to both allocation granularity and dynamic per-dispatch LDS allocations.'
