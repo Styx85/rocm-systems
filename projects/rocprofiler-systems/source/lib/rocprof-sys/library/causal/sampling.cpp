@@ -29,6 +29,7 @@
 #include <timemory/variadic.hpp>
 
 #include "logger/debug.hpp"
+#include "logger/logger.hpp"
 
 #include <csignal>
 #include <cstdlib>
