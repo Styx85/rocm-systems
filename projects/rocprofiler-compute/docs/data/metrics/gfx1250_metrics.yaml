@@ -199,19 +199,19 @@ Memory chart - GL0 Cache (Vector L0):
     rst: Average GL0 cache request latency.
     unit: Cycles
 Memory chart - LDS (Local Data Share):
-  LDS Load Requests:
+  LDS Load Instructions:
     rst: Number of LDS load requests.
     unit: Requests per Normalization Unit
-  LDS Store Requests:
+  LDS Store Instructions:
     rst: Number of LDS store requests.
     unit: Requests per Normalization Unit
-  LDS Atomic Requests:
+  LDS Atomics Instructions:
     rst: Number of LDS atomic requests.
     unit: Requests per Normalization Unit
-  Async Load Requests:
+  TXA Async Load Instruction:
     rst: Number of async load requests.
     unit: Requests per Normalization Unit
-  Async Store Requests:
+  TXA Async Store Instruction:
     rst: Number of async store requests.
     unit: Requests per Normalization Unit
   LDS Utilization:

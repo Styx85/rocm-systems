@@ -107,19 +107,19 @@ Panel Config:
         value: Value
         unit: Unit
       metric:
-        LDS Load Requests:
+        LDS Load Instructions:
           value: ROUND(SUM(TX_VCA_LDS_LOAD_WAVEFRONTS_sum) / SUM($denom), 0)
           unit: (Requests + $normUnit)
-        LDS Store Requests:
+        LDS Store Instructions:
           value: ROUND(SUM(TX_VCA_LDS_STORE_WAVEFRONTS_sum) / SUM($denom), 0)
           unit: (Requests + $normUnit)
-        LDS Atomic Requests:
+        LDS Atomics Instructions:
           value: ROUND(SUM(TX_VCA_LDS_ATOMIC_WAVEFRONTS_sum) / SUM($denom), 0)
           unit: (Requests + $normUnit)
-        Async Load Requests:
+        TXA Async Load Instruction:
           value: ROUND(SUM(TX_VCA_ASYNC_LOAD_WAVEFRONT_sum) / SUM($denom), 0)
           unit: (Requests + $normUnit)
-        Async Store Requests:
+        TXA Async Store Instruction:
           value: ROUND(SUM(TX_VCA_ASYNC_STORE_WAVEFRONT_sum) / SUM($denom), 0)
           unit: (Requests + $normUnit)
         LDS Utilization:
@@ -387,19 +387,19 @@ Panel Config:
     GL0 Hit Rate: >-
       GL0 cache hit rate.
 
-    LDS Load Requests: >-
+    LDS Load Instructions: >-
       Number of LDS load requests.
 
-    LDS Store Requests: >-
+    LDS Store Instructions: >-
       Number of LDS store requests.
 
-    LDS Atomic Requests: >-
+    LDS Atomics Instructions: >-
       Number of LDS atomic requests.
 
-    Async Load Requests: >-
+    TXA Async Load Instruction: >-
       Number of async load requests.
 
-    Async Store Requests: >-
+    TXA Async Store Instruction: >-
       Number of async store requests.
 
     LDS Utilization: >-

@@ -172,11 +172,11 @@ UNIT_VARIANTS["gfx1201"] = {
 }
 UNIT_VARIANTS["gfx1250"] = {
     "2.1.17": ("Active WGPs", "WGPs per Cycle"),
-    "3.4.0": ("LDS Load Requests", "(Requests + $normUnit)"),
-    "3.4.1": ("LDS Store Requests", "(Requests + $normUnit)"),
-    "3.4.2": ("LDS Atomic Requests", "(Requests + $normUnit)"),
-    "3.4.3": ("Async Load Requests", "(Requests + $normUnit)"),
-    "3.4.4": ("Async Store Requests", "(Requests + $normUnit)"),
+    "3.4.0": ("LDS Load Instructions", "(Requests + $normUnit)"),
+    "3.4.1": ("LDS Store Instructions", "(Requests + $normUnit)"),
+    "3.4.2": ("LDS Atomics Instructions", "(Requests + $normUnit)"),
+    "3.4.3": ("TXA Async Load Instruction", "(Requests + $normUnit)"),
+    "3.4.4": ("TXA Async Store Instruction", "(Requests + $normUnit)"),
     "3.4.14": ("TDM Load Requests", "(Requests + $normUnit)"),
     "3.4.15": ("TDM Store Requests", "(Requests + $normUnit)"),
     "6.2.0": ("Dispatched Workgroups", "Count"),
