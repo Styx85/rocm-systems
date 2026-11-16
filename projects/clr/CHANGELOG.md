@@ -14,7 +14,10 @@ Full documentation for HIP is available at [rocm.docs.amd.com](https://rocm.docs
         `hipMemcpy3DBatchOp` structure, without requiring the caller to build the operation list
         that `hipMemcpy3DBatchAsync` takes.
     - Execution affinity: support for API parity with corresponding CUDA API.
-      * `hipDeviceGetExecAffinitySupport` reports whether a device supports a given execution-affinity type and the device's CU-masking granularity.
+      * `hipDeviceGetExecAffinitySupport` reports whether a device supports a given execution-affinity
+        type and the device's CU-masking granularity. `hipExecAffinityTypeCUCount` is always reported
+        as supported. Two HIP-specific extension types, `hipExtExecAffinityTypeGranularityCU` and
+        `hipExtExecAffinityTypeGranularityWGP`, report the granularity the applies to the CU mask.
 
 ### Resolved issues
 
