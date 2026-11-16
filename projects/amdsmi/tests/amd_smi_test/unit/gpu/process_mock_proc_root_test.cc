@@ -127,7 +127,7 @@ class TestGpu {
 class MockProcessRoots {
  public:
   MockProcessRoots()
-      : proc_root_(smi_amdgpu_proc_root, smi_amdgpu_set_proc_root_for_testing, proc_.root() + "/"),
+      : proc_root_(amd::smi::test_hooks::ProcRoot, amd::smi::test_hooks::SetProcRoot, proc_.root()),
         kfd_root_(kfd_.root()) {}
 
   FakeSysfsTree& proc() { return proc_; }

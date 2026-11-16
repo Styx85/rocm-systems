@@ -104,7 +104,8 @@ static amdsmi_status_t FdinfoReadStatus(int err) {
 }
 
 auto smi_amdgpu_fdinfo_shows_gpu(long pid, std::string_view bdf) -> amdsmi_status_t {
-  const std::string fdinfo_dir = smi_amdgpu_proc_root() + std::to_string(pid) + "/fdinfo";
+  const std::string fdinfo_dir =
+      amd::smi::test_hooks::ProcRoot() + "/" + std::to_string(pid) + "/fdinfo";
   DIR* d = opendir(fdinfo_dir.c_str());
   if (d == nullptr) {
     const int err = errno;
@@ -233,7 +234,7 @@ amdsmi_status_t gpuvsmi_get_pid_info(const amdsmi_bdf_t& bdf, long int pid,
            static_cast<uint32_t>(bdf.device_number & 0x1f),
            static_cast<uint32_t>(bdf.function_number & 0x7));
 
-  const std::string pid_dir = smi_amdgpu_proc_root() + std::to_string(pid);
+  const std::string pid_dir = amd::smi::test_hooks::ProcRoot() + "/" + std::to_string(pid);
   std::string path = pid_dir + "/fdinfo/";
   std::string name_path = pid_dir + "/exe";
   std::string cgroup_path = pid_dir + "/cgroup";

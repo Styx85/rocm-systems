@@ -122,8 +122,8 @@ class MockPidNamespace {
         other_kfd_node_(kOtherKfdGpuId, other_rocm_device_.index()),
         gpu_device_(rocm_device_.index(), "card9", TestBdf(), drm_),
         registration_(&gpu_device_),
-        amdsmi_proc_root_(smi_amdgpu_proc_root, smi_amdgpu_set_proc_root_for_testing,
-                          proc_.root() + "/") {
+        amdsmi_proc_root_(amd::smi::test_hooks::ProcRoot, amd::smi::test_hooks::SetProcRoot,
+                          proc_.root()) {
     auto& devices = amd::smi::RocmSMI::getInstance().devices();
     devices[rocm_device_.index()]->set_kfd_gpu_id(kKfdGpuId);
     devices[rocm_device_.index()]->set_drm_render_minor(files_.render_node.minor);

@@ -39,8 +39,6 @@ amdsmi_status_t smi_amdgpu_get_bad_page_info(amd::smi::AMDSmiGPUDevice* device, 
 amdsmi_status_t smi_amdgpu_get_bad_page_threshold(amd::smi::AMDSmiGPUDevice* device,
                                                   uint32_t* threshold);
 amdsmi_status_t smi_amdgpu_validate_ras_eeprom(amd::smi::AMDSmiGPUDevice* device);
-amdsmi_status_t smi_amdgpu_get_ecc_error_count(amd::smi::AMDSmiGPUDevice* device,
-                                               amdsmi_error_count_t* err_cnt);
 amdsmi_status_t smi_amdgpu_get_driver_version(amd::smi::AMDSmiGPUDevice* device, int* length,
                                               char* version);
 amdsmi_status_t smi_amdgpu_get_pcie_speed_from_pcie_type(uint16_t pcie_type, uint32_t* pcie_speed);
@@ -353,7 +351,7 @@ auto smi_amdgpu_sum_drm_fdinfo(const std::string& fdinfo_dir, std::string_view b
 /**
  *  @brief Whether a process's DRM fdinfo shows a client of the GPU at @p bdf.
  *
- *  @param[in] pid The process, read under smi_amdgpu_proc_root().
+ *  @param[in] pid The process, read under amd::smi::test_hooks::ProcRoot().
  *  @param[in] bdf The GPU's address as fdinfo prints it, such as "0000:03:00.0".
  *  @return ::AMDSMI_STATUS_SUCCESS if one of its fdinfo files has that drm-pdev,
  *  ::AMDSMI_STATUS_NOT_FOUND if none has or the process has exited, otherwise

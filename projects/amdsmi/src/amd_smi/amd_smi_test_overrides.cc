@@ -3,18 +3,35 @@
 
 #include "amd_smi/impl/amd_smi_test_overrides.h"
 
+namespace amd::smi::test_hooks {
+
 namespace {
-// Not thread-safe: only the single-threaded tests mutate it (via
-// amd::smi::testing::ScopedOverride); production never writes it.
-std::string g_sysfs_drm_root = "/sys/class/drm/";
-std::string g_proc_root = "/proc/";
+// Not thread-safe for tests: only single-threaded tests mutate these (via
+// amd::smi::testing::ScopedOverride), never while another thread may be using the library.
+// Production only reads them, possibly from several threads.
+std::string g_sysfs_drm_root = "/sys/class/drm";
+std::string g_app_tmp_dir = "/tmp";
+std::string g_kfd_nodes_path_root = "/sys/class/kfd/kfd/topology/nodes";
+std::string g_proc_root = "/proc";
 }  // namespace
 
-// See amd_smi_test_overrides.h for the contract.
-const std::string& smi_amdgpu_sysfs_drm_root() { return g_sysfs_drm_root; }
+// The setters are declared only in the tests (test_fixture_utils.h), not in the header above.
+// This is so production code does not try to use the setter calls, only test code.
 
-void smi_amdgpu_set_sysfs_drm_root_for_testing(const std::string& root) { g_sysfs_drm_root = root; }
+const std::string& SysfsDrmRoot() { return g_sysfs_drm_root; }
 
-const std::string& smi_amdgpu_proc_root() { return g_proc_root; }
+AMDSMI_TEST_HOOK void SetSysfsDrmRoot(const std::string& root) { g_sysfs_drm_root = root; }
 
-void smi_amdgpu_set_proc_root_for_testing(const std::string& root) { g_proc_root = root; }
+const std::string& KfdNodesPathRoot() { return g_kfd_nodes_path_root; }
+
+AMDSMI_TEST_HOOK void SetKfdNodesPathRoot(const std::string& root) { g_kfd_nodes_path_root = root; }
+
+const std::string& AppTmpDir() { return g_app_tmp_dir; }
+
+AMDSMI_TEST_HOOK void SetAppTmpDir(const std::string& dir) { g_app_tmp_dir = dir; }
+
+const std::string& ProcRoot() { return g_proc_root; }
+
+AMDSMI_TEST_HOOK void SetProcRoot(const std::string& root) { g_proc_root = root; }
+
+}  // namespace amd::smi::test_hooks
