@@ -141,7 +141,7 @@ static ncclResult_t postTuneSymFreeTuningInfoRaw(struct ncclComm* comm, struct n
   return ncclSuccess;
 }
 
-// scale is rcclP2pBaseScale of the collective: 1 except single-node gather/scatter.
+// scale is rcclP2pBaseScale of the collective: 1 except single-node gather and send/recv.
 static ncclResult_t postTuneP2pChannelBase(struct ncclComm* comm, int peer, bool isSendNotRecv, int scale,
                                            uint8_t* baseOut) {
   int round = 0;
@@ -168,7 +168,7 @@ static ncclResult_t postTuneP2pRecordPreconnect(struct ncclComm* comm, int peer,
   int nParts = rcclP2pTaskParts(comm, collAPI);
   if (nParts == comm->p2pnChannelsPerPeer && !rcclP2pHalvedSingleNode(comm))
     (isSendNotRecv ? planner->peers[peer].sendSeen : planner->peers[peer].recvSeen) = true;
-  // Gather/scatter also connect the unscaled block a mixed pair uses (see rcclP2pWorkBase).
+  // gather and send/recv also connect the unscaled block a mixed pair uses (see rcclP2pWorkBase).
   int nScales = rcclP2pBaseScale(comm, collAPI) > 1 ? 2 : 1;
   for (int s = 0; s < nScales; s++) {
     NCCLCHECK(postTuneP2pChannelBase(comm, peer, isSendNotRecv, s == 0 ? rcclP2pBaseScale(comm, collAPI) : 1, &base));

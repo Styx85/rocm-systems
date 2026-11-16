@@ -1398,7 +1398,7 @@ static int rcclP2pPolicyChannels(struct ncclComm* comm, struct ncclTaskP2p* task
   return -1;
 }
 
-// Channel base of a round's work. Gather/scatter scale the round so each round gets its
+// Channel base of a round's work. Gather and send/recv scale the round so each round gets its
 // own block of parts. A pair with different scales shares one base, so it takes the smaller.
 static uint8_t rcclP2pWorkBase(struct ncclComm* comm, int p2pRound, struct ncclTaskP2p* const* p2pTasks) {
   int scale = 0;
@@ -4042,7 +4042,7 @@ static ncclResult_t p2pTaskAppend(struct ncclComm* comm, struct ncclInfo* info, 
       while (peer != (isSendNotRecv ? comm->p2pSchedule[round].sendRank : comm->p2pSchedule[round].recvRank)) {
         round += 1;
       }
-      // Connect this collective's scaled block, and for gather/scatter also the unscaled block
+      // Connect this collective's scaled block, and for gather and send/recv also the unscaled block
       // a mixed pair (rcclP2pWorkBase takes the smaller scale) uses.
       int nScales = rcclP2pBaseScale(comm, collAPI) > 1 ? 2 : 1;
       for (int s = 0; s < nScales; s++) {
