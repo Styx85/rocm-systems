@@ -89,6 +89,12 @@ static bool symBatchesAlone(const struct ncclTaskColl* t) {
   return t->aggIsolate || t->symkExtract == RCCL_SYMK_EXTRACT_ALLOW_TDM_ONLY;
 }
 
+// [RCCL] workArgsBytes can exceed 4 KB (ncclDevKernelArgs5K), but every symmetric kernel takes a
+// ncclSymkDevWorkArgs4K argument, so a symmetric batch must still fit in 4 KB.
+static size_t symkMaxArgsBytes(struct ncclComm* comm) {
+  return std::min<size_t>(comm->workArgsBytes, sizeof(ncclSymkDevWorkArgs4K));
+}
+
 ncclResult_t ncclMakeSymmetricTaskList(struct ncclComm* comm, struct ncclTaskColl* task,
                                        struct ncclIntruQueue<struct ncclTaskColl, &ncclTaskColl::next>* symTaskQueue,
                                        struct ncclTaskColl** remainTasksHead) {
@@ -164,8 +170,8 @@ ncclResult_t ncclMakeSymmetricTaskList(struct ncclComm* comm, struct ncclTaskCol
   if (!foundSymm) goto exit;
 
   // make sure kernel args space can hold at least a single work
-  if (comm->workArgsBytes < ncclSymkDevWorkArgs::calcArgsSize(MAXCHANNELS, 1, ncclProfilerPluginLoaded())) {
-    WARN("Symmetric kernel args size %u is smaller than minimum size %zu", comm->workArgsBytes,
+  if (symkMaxArgsBytes(comm) < ncclSymkDevWorkArgs::calcArgsSize(MAXCHANNELS, 1, ncclProfilerPluginLoaded())) {
+    WARN("Symmetric kernel args size %zu is smaller than minimum size %zu", symkMaxArgsBytes(comm),
          ncclSymkDevWorkArgs::calcArgsSize(MAXCHANNELS, 1, ncclProfilerPluginLoaded()));
     return ncclInternalError;
   }
@@ -194,7 +200,7 @@ ncclResult_t ncclMakeSymmetricTaskList(struct ncclComm* comm, struct ncclTaskCol
         // (it is the head), or if the next task is one (so it starts its own batch).
         bool configBoundary = symBatchesAlone(task) || (task->next != nullptr && symBatchesAlone(task->next));
         if (ncclSymkDevWorkArgs::calcArgsSize(MAXCHANNELS, nWorks + 1, ncclProfilerPluginLoaded()) >
-              comm->workArgsBytes ||
+              symkMaxArgsBytes(comm) ||
             task->next == nullptr || configBoundary) {
           task->isSymLast = 1;
           break;
