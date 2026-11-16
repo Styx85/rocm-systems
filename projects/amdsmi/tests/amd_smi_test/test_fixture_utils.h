@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <functional>
 #include <limits>
+#include <memory>
 #include <string>
 #include <utility>
 
@@ -18,6 +19,7 @@
 
 namespace amd::smi {
 class AMDSmiProcessor;
+class KFDNode;
 }  // namespace amd::smi
 
 // Generic (not RAS-specific) fake-sysfs fixture tree, reusable by any unit
@@ -176,6 +178,23 @@ class ScopedRocmSmiDevice {
 
  private:
   uint32_t index_;
+};
+
+// RAII: maps KFD GPU id `gpu_id` to device index `dev_index` in RocmSMI's KFD
+// node map, as KFD topology discovery does for a real GPU, so that the rocm_smi
+// process APIs report that device for a process KFD shows on that GPU. Restores
+// the map's previous entry for `gpu_id`, if any, on destruction.
+class ScopedKfdNode {
+ public:
+  ScopedKfdNode(uint64_t gpu_id, uint32_t dev_index);
+  ~ScopedKfdNode();
+
+  ScopedKfdNode(const ScopedKfdNode&) = delete;
+  ScopedKfdNode& operator=(const ScopedKfdNode&) = delete;
+
+ private:
+  uint64_t gpu_id_;
+  std::shared_ptr<amd::smi::KFDNode> previous_;
 };
 
 // Waits until a GPU's process list cached by an earlier query (for
