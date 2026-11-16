@@ -114,7 +114,13 @@ bool supports_counter_capacity(rj_code_arch_t arch) {
 /// skipped only if: DScnt==0 and EXEC==0" (CDNA5 ISA 3.2.2.1). A skipped
 /// instruction leaves no older operation on those counters to complete, so
 /// either way its admission is sound.
-bool exec_zero_memory_issue_counts(rj_code_arch_t arch) { return arch == ROCJITSU_CODE_ARCH_CDNA5; }
+///
+/// On gfx950 (CDNA4), a buffer or global instruction issued with EXEC zero
+/// counts on VMCNT, in order with the wave's other vector memory instructions.
+/// docs/race-detector.md lists the instructions measured on MI355X (#15938).
+bool exec_zero_memory_issue_counts(rj_code_arch_t arch) {
+  return arch == ROCJITSU_CODE_ARCH_CDNA5 || arch == ROCJITSU_CODE_ARCH_CDNA4;
+}
 
 /// The obligations on which a gfx1250 memory instruction issued with EXEC zero
 /// is sure to count. It is skipped only when the counters its encoding names are
@@ -124,7 +130,10 @@ bool exec_zero_memory_issue_counts(rj_code_arch_t arch) { return arch == ROCJITS
 /// it either counts or was skipped because they were empty, so admitting it and
 /// recording its slot are sound. On any other counter, such as the ASYNCcnt of
 /// ds_atomic_async_barrier_arrive_b64, an LDS instruction, it may be skipped
-/// while the counter is nonzero, so that obligation is left out.
+/// while the counter is nonzero, so that obligation is left out. On CDNA4 only a
+/// buffer or global instruction keeps its VMCNT obligation; DS and FLAT
+/// instructions issued with EXEC zero were not measured there (see
+/// exec_zero_memory_issue_counts()).
 amdgpu::MemoryIssueInfo exec_zero_counted_obligations(const amdgpu::MemoryIssueInfo &info,
                                                       std::string_view mnemonic) {
   const bool lds = mnemonic.starts_with("ds_");
@@ -142,6 +151,9 @@ amdgpu::MemoryIssueInfo exec_zero_counted_obligations(const amdgpu::MemoryIssueI
     case amdgpu::WaitCounterType::ASYNCCNT:
     case amdgpu::WaitCounterType::TENSORCNT:
       counts = !lds;
+      break;
+    case amdgpu::WaitCounterType::VMCNT:
+      counts = !lds && !flat;
       break;
     default:
       break;
@@ -168,15 +180,15 @@ bool ignored_memory_issue(const Instruction &inst, const amdgpu::Wavefront &wf) 
 
 /// Record a counter slot that an instruction holds without registers or LDS
 /// bytes, as an event, so that later capacity checks and partial waits count
-/// it. Two kinds of gfx1250 instruction hold one:
-/// - A memory instruction issued with EXEC zero, on the counters
+/// it. Two kinds of instruction hold one:
+/// - A gfx1250 or CDNA4 memory instruction issued with EXEC zero, on the counters
 ///   exec_zero_counted_obligations() selects. Recording the slot is sound even
 ///   if the instruction was skipped: those counters were then zero, so every
 ///   earlier operation on them had completed, and oldest-first retirement
 ///   reaches the slot before any later operation. A FLAT instruction's slots
 ///   are recorded by register_unused_flat_domains(), so its routed obligations
 ///   here are empty.
-/// - A wait-counter producer without memory issue metadata, on the counter
+/// - A gfx1250 wait-counter producer without memory issue metadata, on the counter
 ///   counter_only_slot() selects.
 void register_counter_slot(WaveRaceState &race, const InstructionSnapshot &instruction,
                            std::span<const amdgpu::MemoryCounterObligation> obligations,
@@ -617,9 +629,10 @@ void RaceDetectorPlugin::onAmdgpuMemoryAccessRouted(const amdgpu::MemoryAccessOb
     register_unused_flat_domains(*rs, instruction, *decoded, *routed,
                                  inst.data_as<amdgpu::VectorMemState>()->is_load);
 
-  // A gfx1250 instruction issued with wave EXEC zero holds its counter slot. An
-  // access whose lanes are all cleared while EXEC is active records none, and
-  // neither does an ignored buffer instruction (see ignored_memory_issue()).
+  // A gfx1250 or CDNA4 instruction issued with wave EXEC zero holds its counter
+  // slot (see exec_zero_memory_issue_counts()). An access whose lanes are all
+  // cleared while EXEC is active records none, and neither does an ignored
+  // buffer instruction (see ignored_memory_issue()).
   const auto record_exec_zero_slot = [&](bool is_load) {
     if (!exec_zero_memory_issue_counts(wf.cu().arch()) || wf.exec() != 0 ||
         ignored_memory_issue(inst, wf))
