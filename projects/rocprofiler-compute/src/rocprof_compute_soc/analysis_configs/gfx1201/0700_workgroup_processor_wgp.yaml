@@ -206,12 +206,12 @@ Panel Config:
         value: Avg
         unit: Unit
       metric:
-        SQ_INSTS_VALU:
+        VALU Instructions:
           value: ROUND(SUM(SQ_INSTS_VALU_sum), 0)
           unit: Instructions
           peak: None
           pct_of_peak: false
-        SQ_INST_CYCLES_VALU:
+        VALU Instruction Cycles:
           value: ROUND(SUM(SQ_INST_CYCLES_VALU_sum), 0)
           unit: Cycles
           peak: None
@@ -224,12 +224,12 @@ Panel Config:
         value: Avg
         unit: Unit
       metric:
-        SQ_WMMA_VALU_INSTS:
+        WMMA Instructions:
           value: ROUND(SUM(SQ_WMMA_VALU_INSTS_sum), 0)
           unit: Instructions
           peak: None
           pct_of_peak: false
-        SQ_INST_CYCLES_VALU_WMMA:
+        WMMA Instruction Cycles:
           value: ROUND(SUM(SQ_INST_CYCLES_VALU_WMMA_sum), 0)
           unit: Cycles
           peak: None
@@ -331,15 +331,15 @@ Panel Config:
       Scalar general-purpose registers allocated for the kernel, from
       dispatch metadata. Allocation granularity can increase the reported
       value above the compiler's request.
-    SQ_INSTS_VALU: >-
+    VALU Instructions: >-
       Raw vector arithmetic instruction count. This includes integer and
       floating-point instructions and is not a FLOP count.
-    SQ_INST_CYCLES_VALU: >-
+    VALU Instruction Cycles: >-
       Cycles needed to execute VALU operations, counting overlapping V_OP32_1
       and V_OP32_T instructions separately.
-    SQ_INST_CYCLES_VALU_WMMA: >-
+    WMMA Instruction Cycles: >-
       Cycles of work sent for WMMA.
-    SQ_WMMA_VALU_INSTS: >-
+    WMMA Instructions: >-
       Number of WMMA instructions issued.
     Scratch Allocation: >-
       Bytes of scratch memory allocated per work-item, from dispatch metadata.

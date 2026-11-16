@@ -274,7 +274,7 @@ Panel Config:
         GMI Write Bandwidth:
           value: 32 * SUM(GC_EA_SE_SARB_GMI_WR_SIZE_REQ_sum) / (SUM(End_Timestamp - Start_Timestamp) / 1e9)
           unit: Bytes/s
-        EA Stall Rate:
+        EA Stalled by SDP:
           value: ROUND(100 * SUM(GC_EA_SE_SARB_STALLED_sum) / SUM(GC_EA_SE_BUSY_CYCLE_sum), 0)
           unit: Percent
 
@@ -519,5 +519,5 @@ Panel Config:
     GMI Write Bandwidth: >-
       Total write bandwidth to peer GPU HBM via Infinity Fabric.
 
-    EA Stall Rate: >-
+    EA Stalled by SDP: >-
       Percentage of EA-busy cycles where the EA is stalled.
