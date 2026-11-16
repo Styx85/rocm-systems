@@ -94,7 +94,7 @@ Panel Config:
           min: MIN(TCP_TOTAL_WRITEBACK_INVALIDATES_sum / $denom)
           max: MAX(TCP_TOTAL_WRITEBACK_INVALIDATES_sum / $denom)
           unit: (Requests + $normUnit)
-        L1-L2 BW:
+        L1-L2 Bandwidth:
           avg: SUM(128 * TCP_TCC_READ_REQ_sum + 64 * (TCP_TCC_WRITE_REQ_sum + TCP_TCC_ATOMIC_WITH_RET_REQ_sum + TCP_TCC_ATOMIC_WITHOUT_RET_REQ_sum)) / SUM(End_Timestamp - Start_Timestamp)
           min: MIN((128 * TCP_TCC_READ_REQ_sum + 64 * (TCP_TCC_WRITE_REQ_sum + TCP_TCC_ATOMIC_WITH_RET_REQ_sum + TCP_TCC_ATOMIC_WITHOUT_RET_REQ_sum)) / (End_Timestamp - Start_Timestamp))
           max: MAX((128 * TCP_TCC_READ_REQ_sum + 64 * (TCP_TCC_WRITE_REQ_sum + TCP_TCC_ATOMIC_WITH_RET_REQ_sum + TCP_TCC_ATOMIC_WITHOUT_RET_REQ_sum)) / (End_Timestamp - Start_Timestamp))
@@ -309,7 +309,7 @@ Panel Config:
     Invalidations: The number of times the vL1D was issued a write-back invalidate
       command during the kernel's execution per normalization unit. This may be triggered
       by, for instance, the buffer_wbinvl1 instruction.
-    L1-L2 BW: The number of bytes transferred across the vL1D-L2 interface as a result
+    L1-L2 Bandwidth: The number of bytes transferred across the vL1D-L2 interface as a result
       of VMEM instructions, divided by total duration. The number of bytes is calculated
       as the number of cache lines requested multiplied by the cache line size. This
       value does not consider partial requests, so for instance, if only a single

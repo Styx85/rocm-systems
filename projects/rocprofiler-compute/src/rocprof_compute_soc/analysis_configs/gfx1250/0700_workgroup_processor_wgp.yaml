@@ -612,7 +612,7 @@ Panel Config:
           min: 100 * MIN(SQC_DCACHE_HITS_sum / SQC_DCACHE_REQ_sum)
           max: 100 * MAX(SQC_DCACHE_HITS_sum / SQC_DCACHE_REQ_sum)
           unit: Percent
-        Dcache Request Bandwidth:
+        Dcache Request Bytes:
           avg: 4 * SUM(SQC_SMEM_LOAD_DWORDS_sum) / SUM($denom)
           min: MIN(SQC_SMEM_LOAD_DWORDS_sum * 4 / $denom)
           max: MAX(SQC_SMEM_LOAD_DWORDS_sum * 4 / $denom)
@@ -889,7 +889,7 @@ Panel Config:
     Dcache Hit Rate: >-
       Scalar Data Cache hit rate.
 
-    Dcache Request Bandwidth: >-
+    Dcache Request Bytes: >-
       Total Scalar Data Cache bandwidth.
 
     Interface Stall Rate: >-

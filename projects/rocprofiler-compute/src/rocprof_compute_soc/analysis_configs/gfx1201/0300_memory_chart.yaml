@@ -28,10 +28,10 @@ Panel Config:
         DCache Requests:
           value: SUM(SQC_DCACHE_REQ_sum) / SUM($denom)
           unit: (Requests + $normUnit)
-        DCache Hit Rate:
+        sL1D Hits per Request:
           value: 100 * SUM(SQC_DCACHE_HITS_sum) / SUM(SQC_DCACHE_REQ_sum)
           unit: Percent
-        DCache Load Bandwidth:
+        Dcache Request Bandwidth:
           value: 4 * SUM(SQC_SMEM_LOAD_DWORDS_sum) / (SUM(End_Timestamp - Start_Timestamp) / 1e9)
           unit: Bytes/s
   - metric_table:
@@ -133,11 +133,11 @@ Panel Config:
       may indicate large kernels exceeding instruction cache capacity or divergent branches.
     DCache Requests: >-
       Scalar data cache requests after bank serialization, normalized by the chosen unit.
-    DCache Hit Rate: >-
+    sL1D Hits per Request: >-
       Percentage of scalar data cache accesses that hit in cache. High hit rates indicate
       efficient reuse of constant and uniform data. Low hit rates may indicate excessive
       unique constant data or poor temporal locality.
-    DCache Load Bandwidth: >-
+    Dcache Request Bandwidth: >-
       Bytes loaded by scalar memory instructions, from the dwords each instruction loads.
       Bounds-check reductions are ignored.
     GL0 Hit Rate: >-
