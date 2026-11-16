@@ -51,15 +51,15 @@ System Speed-of-Light:
     plain: Percentage of L2 lookups that hit.
     rst: Percentage of L2 lookups that hit.
     unit: Percent
-  Scalar Data Cache BW:
+  sL1D Load Bandwidth:
     plain: Bytes loaded by scalar memory instructions, from the dwords each instruction loads. Bounds-check reductions are ignored.
     rst: Bytes loaded by scalar memory instructions, from the dwords each instruction loads. Bounds-check reductions are ignored.
     unit: GB/s
-  Scalar Data Cache Hit Rate:
+  sL1D Hit Rate:
     plain: Percentage of scalar data cache accesses that hit. High hit rates indicate efficient reuse of constant and uniform data. Low rates may suggest excessive unique constant data or poor temporal locality.
     rst: Percentage of scalar data cache accesses that hit. High hit rates indicate efficient reuse of constant and uniform data. Low rates may suggest excessive unique constant data or poor temporal locality.
     unit: Percent
-  Instruction Cache Hit Rate:
+  L1I Hit Rate:
     plain: Percentage of instruction cache accesses that hit. High hit rates are essential for sustained instruction throughput. Low rates may indicate large kernels or divergent branches causing instruction cache thrashing.
     rst: Percentage of instruction cache accesses that hit. High hit rates are essential for sustained instruction throughput. Low rates may indicate large kernels or divergent branches causing instruction cache thrashing.
     unit: Percent
