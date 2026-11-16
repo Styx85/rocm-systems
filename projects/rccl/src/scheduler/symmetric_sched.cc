@@ -390,6 +390,12 @@ ncclResult_t ncclSymmetricTaskScheduler(struct ncclComm* comm,
   }
 
   plan->kernelArgsSize = ncclSymkDevWorkArgs::calcArgsSize(nMaxChannels, workCount, profilerEnabled);
+  if (plan->kernelArgsSize > sizeof(ncclSymkDevWorkArgs4K)) {
+    WARN("Symmetric kernel args size %zu for %d works exceeds the %zu-byte symmetric kernel argument",
+         plan->kernelArgsSize, workCount, sizeof(ncclSymkDevWorkArgs4K));
+    ret = ncclInternalError;
+    goto fail;
+  }
   plan->kernelArgsSize = max(plan->kernelArgsSize, sizeof(ncclSymkDevWorkArgs4K));
   argsBuf = (struct ncclSymkDevWorkArgs*)calloc(1, plan->kernelArgsSize);
   if (argsBuf == NULL) {
