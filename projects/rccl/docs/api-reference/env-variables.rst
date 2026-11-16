@@ -526,11 +526,13 @@ collected in the following table.
           inside a group or a graph capture, while ``NCCL_ALGO`` is set, or
           while a backend is forced. The first eligible call splits the
           communicator, so all ranks must use the same value.
-      - | ``-1``: Auto (default). On gfx1250, used for ``ncclSum`` with eight
-          ranks per host and these message sizes: 2 to 512 MiB on two hosts for
-          ``ncclFloat32``, ``ncclFloat16`` and ``ncclBfloat16``, and for
-          ``ncclFloat32`` only, 1 MiB to 1 GiB on four hosts and 1 MiB to 2 GiB
-          on eight hosts. Not used with other host counts.
+      - | ``-1``: Auto (default). On gfx1250, used for ``ncclSum`` with these
+          layouts and message sizes. With eight ranks per host: 2 to 512 MiB on
+          two hosts for ``ncclFloat32``, ``ncclFloat16`` and ``ncclBfloat16``,
+          and for ``ncclFloat32`` only, 1 MiB to 1 GiB on four hosts and 1 MiB
+          to 2 GiB on eight hosts. With four ranks per host, for
+          ``ncclFloat32`` only: 2 to 32 MiB on four hosts and 2 to 256 MiB on
+          eight hosts. Not used with other layouts.
         | ``0``: Disabled.
         | ``1``: Enabled for every eligible AllReduce.
 
@@ -543,8 +545,8 @@ collected in the following table.
           aligned buffers, at most 16 hosts and 16 ranks per host, and a count
           that splits into 16-byte pieces per local rank. Otherwise the three
           collectives run. All ranks must use the same value.
-      - | ``-1``: Auto (default). Used on one or two hosts for messages from
-          4 to 128 MiB.
+      - | ``-1``: Auto (default). Used on one or two hosts with eight ranks
+          per host for messages from 4 to 128 MiB.
         | ``0``: Disabled.
         | ``1``: Used wherever the kernel applies.
 
