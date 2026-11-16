@@ -67,22 +67,22 @@ Panel Config:
           min: MIN(TA_FLAT_ATOMIC_WAVEFRONTS_sum / $denom)
           max: MAX(TA_FLAT_ATOMIC_WAVEFRONTS_sum / $denom)
           unit: (Instructions + $normUnit)
-        Spill/Stack Instructions:
+        Buffer Instructions:
           avg: SUM(TA_BUFFER_WAVEFRONTS_sum) / SUM($denom)
           min: MIN(TA_BUFFER_WAVEFRONTS_sum / $denom)
           max: MAX(TA_BUFFER_WAVEFRONTS_sum / $denom)
           unit: (Instructions + $normUnit)
-        Spill/Stack Read Instructions:
+        Buffer Read Instructions:
           avg: SUM(TA_BUFFER_READ_WAVEFRONTS_sum) / SUM($denom)
           min: MIN(TA_BUFFER_READ_WAVEFRONTS_sum / $denom)
           max: MAX(TA_BUFFER_READ_WAVEFRONTS_sum / $denom)
           unit: (Instructions + $normUnit)
-        Spill/Stack Write Instructions:
+        Buffer Write Instructions:
           avg: SUM(TA_BUFFER_WRITE_WAVEFRONTS_sum) / SUM($denom)
           min: MIN(TA_BUFFER_WRITE_WAVEFRONTS_sum / $denom)
           max: MAX(TA_BUFFER_WRITE_WAVEFRONTS_sum / $denom)
           unit: (Instructions + $normUnit)
-        Spill/Stack Atomic Instructions:
+        Buffer Atomic Instructions:
           avg: SUM(TA_BUFFER_ATOMIC_WAVEFRONTS_sum) / SUM($denom)
           min: MIN(TA_BUFFER_ATOMIC_WAVEFRONTS_sum / $denom)
           max: MAX(TA_BUFFER_ATOMIC_WAVEFRONTS_sum / $denom)
@@ -97,17 +97,17 @@ Panel Config:
         max: Max
         unit: Unit
       metric:
-        Spill/Stack Total Cycles:
+        Buffer Total Cycles:
           avg: SUM(TA_BUFFER_TOTAL_CYCLES_sum) / SUM($denom)
           min: MIN(TA_BUFFER_TOTAL_CYCLES_sum / $denom)
           max: MAX(TA_BUFFER_TOTAL_CYCLES_sum / $denom)
           unit: (Cycles + $normUnit)
-        Spill/Stack Coalesced Read:
+        Buffer Coalesced Read:
           avg: SUM(TA_BUFFER_COALESCED_READ_CYCLES_sum) / SUM($denom)
           min: MIN(TA_BUFFER_COALESCED_READ_CYCLES_sum / $denom)
           max: MAX(TA_BUFFER_COALESCED_READ_CYCLES_sum / $denom)
           unit: (Cycles + $normUnit)
-        Spill/Stack Coalesced Write:
+        Buffer Coalesced Write:
           avg: SUM(TA_BUFFER_COALESCED_WRITE_CYCLES_sum) / SUM($denom)
           min: MIN(TA_BUFFER_COALESCED_WRITE_CYCLES_sum / $denom)
           max: MAX(TA_BUFFER_COALESCED_WRITE_CYCLES_sum / $denom)
@@ -174,21 +174,21 @@ Panel Config:
     Global/Generic Atomic Instructions: The total number of global & generic memory
       atomic (with and without return) instructions executed on all compute units
       on the accelerator, per normalization unit.
-    Spill/Stack Instructions: The total number of spill/stack memory instructions
+    Buffer Instructions: The total number of spill/stack memory instructions
       executed on all compute units on the accelerator, per normalization unit.
-    Spill/Stack Read Instructions: The total number of spill/stack memory read instructions
+    Buffer Read Instructions: The total number of spill/stack memory read instructions
       executed on all compute units on the accelerator, per normalization unit.
-    Spill/Stack Write Instructions: The total number of spill/stack memory write instructions
+    Buffer Write Instructions: The total number of spill/stack memory write instructions
       executed on all compute units on the accelerator, per normalization unit.
-    Spill/Stack Atomic Instructions: The total number of spill/stack memory atomic
+    Buffer Atomic Instructions: The total number of spill/stack memory atomic
       (with and without return) instructions executed on all compute units on the
       accelerator, per normalization unit. Typically unused as these memory operations
       are typically used to implement thread-local storage.
-    Spill/Stack Total Cycles: The number of cycles the address processing unit spent
+    Buffer Total Cycles: The number of cycles the address processing unit spent
       working on spill/stack instructions, per normalization unit.
-    Spill/Stack Coalesced Read: The number of cycles the address processing unit spent
+    Buffer Coalesced Read: The number of cycles the address processing unit spent
       working on coalesced spill/stack read instructions, per normalization unit.
-    Spill/Stack Coalesced Write: The number of cycles the address processing unit
+    Buffer Coalesced Write: The number of cycles the address processing unit
       spent working on coalesced spill/stack write instructions, per normalization
       unit.
     Data-Return Busy: Percent of the total CU cycles the data-return unit was busy

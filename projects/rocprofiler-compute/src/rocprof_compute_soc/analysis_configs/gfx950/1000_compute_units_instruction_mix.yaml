@@ -162,27 +162,27 @@ Panel Config:
           min: MIN(TA_FLAT_ATOMIC_WAVEFRONTS_sum / $denom)
           max: MAX(TA_FLAT_ATOMIC_WAVEFRONTS_sum / $denom)
           unit: (Instructions + $normUnit)
-        Spill/Stack Instr:
+        Buffer Instructions:
           avg: SUM(TA_BUFFER_WAVEFRONTS_sum) / SUM($denom)
           min: MIN(TA_BUFFER_WAVEFRONTS_sum / $denom)
           max: MAX(TA_BUFFER_WAVEFRONTS_sum / $denom)
           unit: (Instructions + $normUnit)
-        Spill/Stack Coalesceable Instr:
+        Buffer Coalescable Instructions:
           avg: SUM(TA_BUFFER_COALESCEABLE_WAVEFRONTS_sum) / SUM($denom)
           min: MIN(TA_BUFFER_COALESCEABLE_WAVEFRONTS_sum / $denom)
           max: MAX(TA_BUFFER_COALESCEABLE_WAVEFRONTS_sum / $denom)
           unit: (Instructions + $normUnit)
-        Spill/Stack Read:
+        Buffer Read:
           avg: SUM(TA_BUFFER_READ_WAVEFRONTS_sum) / SUM($denom)
           min: MIN(TA_BUFFER_READ_WAVEFRONTS_sum / $denom)
           max: MAX(TA_BUFFER_READ_WAVEFRONTS_sum / $denom)
           unit: (Instructions + $normUnit)
-        Spill/Stack Write:
+        Buffer Write:
           avg: SUM(TA_BUFFER_WRITE_WAVEFRONTS_sum) / SUM($denom)
           min: MIN(TA_BUFFER_WRITE_WAVEFRONTS_sum / $denom)
           max: MAX(TA_BUFFER_WRITE_WAVEFRONTS_sum / $denom)
           unit: (Instructions + $normUnit)
-        Spill/Stack Atomic:
+        Buffer Atomic:
           avg: SUM(TA_BUFFER_ATOMIC_WAVEFRONTS_sum) / SUM($denom)
           min: MIN(TA_BUFFER_ATOMIC_WAVEFRONTS_sum / $denom)
           max: MAX(TA_BUFFER_ATOMIC_WAVEFRONTS_sum / $denom)
@@ -294,16 +294,16 @@ Panel Config:
     Global/Generic Atomic: The total number of global & generic memory atomic (with
       and without return) instructions executed on all compute units on the accelerator,
       per normalization unit.
-    Spill/Stack Instr: The total number of spill/stack memory instructions executed
+    Buffer Instructions: The total number of spill/stack memory instructions executed
       on all compute units on the accelerator, per normalization unit.
-    Spill/Stack Coalesceable Instr: The total number of coalesceable spill/stack memory
+    Buffer Coalescable Instructions: The total number of coalesceable spill/stack memory
       instructions executed on all compute units, per normalization unit. Higher values
       indicate better memory access patterns for private memory operations.
-    Spill/Stack Read: The total number of spill/stack memory read instructions executed
+    Buffer Read: The total number of spill/stack memory read instructions executed
       on all compute units on the accelerator, per normalization unit.
-    Spill/Stack Write: The total number of spill/stack memory write instructions executed
+    Buffer Write: The total number of spill/stack memory write instructions executed
       on all compute units on the accelerator, per normalization unit.
-    Spill/Stack Atomic: The total number of spill/stack memory atomic (with and without
+    Buffer Atomic: The total number of spill/stack memory atomic (with and without
       return) instructions executed on all compute units on the accelerator, per normalization
       unit. Typically unused as these memory operations are typically used to implement
       thread-local storage.
