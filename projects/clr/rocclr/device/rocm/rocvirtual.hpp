@@ -1014,6 +1014,11 @@ class VirtualGPU : public device::VirtualDevice {
                                   hsa_signal_condition32_t cond = HSA_SIGNAL_CONDITION_EQ,
                                   bool skipTs = false,
                                   hsa_signal_t completionSignal = hsa_signal_t{0});
+  //! Submits a split graph end marker, the packet resolving the waits and the nop barrier with
+  //! the interrupt signal, in one slot reservation with one doorbell: a second reservation's
+  //! locked compare-and-swap would wait for the first packet's ring and doorbell stores to land.
+  //! Returns the first packet's signal.
+  ProfilingSignal* dispatchSplitEndMarker();
   //! True if a barrier of the current command needs timestamps: a timed event record, or a
   //! command created under queue or activity profiling
   bool BarrierTimestamps() const;
