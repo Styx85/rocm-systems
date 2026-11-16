@@ -17,12 +17,12 @@
 * `ais-check` no longer reports an LVM parity RAID logical volume (`raid4`, `raid5`, `raid6`) as fastpath capable.
 * Per-GPU I/O statistics are now attributed to the GPU that owns the I/O buffer instead of the caller's active HIP device. Previously, `hipFileGetStatsL3()` and `ais-stats` could report counters against the wrong GPU when the active device differed from the buffer's device.
 * `hipfile.h` now includes `<time.h>`, which declares the `struct timespec` used by `hipFileBatchIOGetStatus()`. Previously, C code that included `<time.h>` after `hipfile.h` got an incompatible pointer type error or warning when passing a `struct timespec *` to `hipFileBatchIOGetStatus()`.
+* The bandwidth reported by `ais-stats` and by the Stats API (`hipFileGetStatsL1()`/`hipFileGetStatsL3()`, `read_bw_bytes_per_sec`/`write_bw_bytes_per_sec`) is now derived from the elapsed wall-clock time during which I/O was in flight, rather than the sum of the per-operation latencies. When several threads issue I/O concurrently, their operations overlap in time, and the old sum-of-latencies denominator understated the reported bandwidth by roughly the number of concurrent threads. Latency is unchanged. The per-size-bucket bandwidth histogram in the `ais-stats` report remains derived from per-operation latency and reflects per-I/O throughput, not aggregate concurrency. See [issue #11919](https://github.com/ROCm/rocm-systems/issues/11919).
 
 ### Removed
 
 ### Known issues
 
-* The bandwidth reported by `ais-stats` and the Stats API is derived from the sum of the per-operation latencies instead of the elapsed wall-clock time, so when several threads issue I/O concurrently, the reported bandwidth is understated by roughly the number of concurrent threads. See [issue #11919](https://github.com/ROCm/rocm-systems/issues/11919).
 * Asynchronous fastpath I/O, added in hipFile 0.5.0 for ROCm 10.1.0, performs poorly. The ROCm runtime serializes all stream host functions onto a single thread, so asynchronous fastpath operations cannot run concurrently.
 
 ## hipFile 0.6.0 for ROCm 10.2.0

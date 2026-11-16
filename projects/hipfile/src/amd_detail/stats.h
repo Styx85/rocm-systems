@@ -103,6 +103,48 @@ struct PerGpuStatsV1 {
     }
 };
 
+// A lock-free accumulator of wall-clock "busy time": the length of the union of
+// the [start, end] intervals of overlapping IOs. Bandwidth is bytes / busyUs, so
+// concurrent IOs that overlap in time are not double counted (unlike summing each
+// IO's duration, which inflates the denominator by the concurrency factor).
+//
+// m_state packs the number of currently-in-flight IOs in the top 16 bits and the
+// timestamp of the last transition (microseconds, masked to 48 bits) in the low
+// bits. Each successful compare-exchange "owns" the interval [oldTs, nowUs] and,
+// if an IO was in flight over it, adds its length to m_busyUs. The CAS serializes
+// transitions, so the owned intervals neither overlap nor leave gaps.
+struct BusyWindow {
+    static constexpr uint64_t TimestampBits{48};
+    static constexpr uint64_t TimestampMask{(uint64_t{1} << TimestampBits) - 1};
+    static constexpr uint64_t ActiveMask{0xFFFF};
+
+    std::atomic_uint64_t state{};
+    std::atomic_uint64_t busyUs{};
+
+    // delta is +1 when an IO starts and -1 when it completes.
+    void transition(int delta, uint64_t nowUs) noexcept
+    {
+        nowUs &= TimestampMask;
+        uint64_t old{state.load(std::memory_order_acquire)};
+        for (;;) {
+            uint64_t active{old >> TimestampBits};
+            uint64_t ts{old & TimestampMask};
+            uint64_t pending{active > 0 ? ((nowUs - ts) & TimestampMask) : 0};
+            uint64_t newActive{(static_cast<uint64_t>(static_cast<int64_t>(active) + delta)) & ActiveMask};
+            uint64_t next{(newActive << TimestampBits) | nowUs};
+            if (state.compare_exchange_weak(old, next, std::memory_order_acq_rel,
+                                            std::memory_order_acquire)) {
+                if (pending != 0) {
+                    busyUs.fetch_add(pending, std::memory_order_relaxed);
+                }
+                return;
+            }
+        }
+    }
+};
+
+static_assert(std::is_standard_layout_v<BusyWindow>, "BusyWindow must be standard layout");
+
 template <typename PerGpuStatsT, size_t gpus> class StatsTemplate {
 public:
     static constexpr size_t MaxGpus{gpus};
@@ -182,6 +224,60 @@ public:
         return m_fastpathRejections;
     }
 
+    // Busy-time windows measured at each grouping the reports expose (per ioType,
+    // per GPU+ioType, per backend+ioType). The union of intervals is not additive,
+    // so it is measured separately at each grouping rather than summed from a finer
+    // one. See BusyWindow and the three bandwidth report sites.
+    BusyWindow *busyByType(IoType ioType) noexcept
+    {
+        if (ioType != IoType::Read && ioType != IoType::Write) {
+            return nullptr;
+        }
+        return &m_busyByType[static_cast<size_t>(ioType)];
+    }
+
+    const BusyWindow *busyByType(IoType ioType) const noexcept
+    {
+        if (ioType != IoType::Read && ioType != IoType::Write) {
+            return nullptr;
+        }
+        return &m_busyByType[static_cast<size_t>(ioType)];
+    }
+
+    BusyWindow *busyByGpuType(size_t gpuId, IoType ioType) noexcept
+    {
+        if (gpuId >= MaxGpus || (ioType != IoType::Read && ioType != IoType::Write)) {
+            return nullptr;
+        }
+        return &m_busyByGpuType[gpuId][static_cast<size_t>(ioType)];
+    }
+
+    const BusyWindow *busyByGpuType(size_t gpuId, IoType ioType) const noexcept
+    {
+        if (gpuId >= MaxGpus || (ioType != IoType::Read && ioType != IoType::Write)) {
+            return nullptr;
+        }
+        return &m_busyByGpuType[gpuId][static_cast<size_t>(ioType)];
+    }
+
+    BusyWindow *busyByBackendType(StatsBackend backend, IoType ioType) noexcept
+    {
+        if (static_cast<size_t>(backend) >= static_cast<size_t>(StatsBackend::Count) ||
+            (ioType != IoType::Read && ioType != IoType::Write)) {
+            return nullptr;
+        }
+        return &m_busyByBackendType[static_cast<size_t>(backend)][static_cast<size_t>(ioType)];
+    }
+
+    const BusyWindow *busyByBackendType(StatsBackend backend, IoType ioType) const noexcept
+    {
+        if (static_cast<size_t>(backend) >= static_cast<size_t>(StatsBackend::Count) ||
+            (ioType != IoType::Read && ioType != IoType::Write)) {
+            return nullptr;
+        }
+        return &m_busyByBackendType[static_cast<size_t>(backend)][static_cast<size_t>(ioType)];
+    }
+
 private:
     const uint64_t       m_version{PerGpuStatsT::version};
     StatsLevel           m_level{};
@@ -189,6 +285,10 @@ private:
     std::atomic_uint64_t m_bufferRegistrations{};
     std::atomic_uint64_t m_fastpathRejections{};
     PerGpuStatsArray     m_perGpuStats{};
+
+    std::array<BusyWindow, 2>                                                       m_busyByType{};
+    std::array<std::array<BusyWindow, 2>, MaxGpus>                                  m_busyByGpuType{};
+    std::array<std::array<BusyWindow, 2>, static_cast<size_t>(StatsBackend::Count)> m_busyByBackendType{};
 };
 
 using StatsV1 = StatsTemplate<PerGpuStatsV1, 16>;
@@ -283,13 +383,13 @@ private:
     pid_t          m_pid{0};
 };
 
+// Tracks a single IO for stats. Construction opens the IO's busy-time window and
+// destruction closes it, so the window spans the tracker's lifetime on every path,
+// including exceptions. complete() separately records the size, count, latency, and
+// alignment histograms; it does not touch the busy window.
 class StatsIoTracker {
 public:
-    StatsIoTracker(IoType ioType, StatsBackend backend, int deviceId) noexcept
-        : m_ioType(ioType), m_backend(backend), m_startTime{std::chrono::steady_clock::now()},
-          m_deviceId{deviceId}, m_aligned{true}
-    {
-    }
+    StatsIoTracker(IoType ioType, StatsBackend backend, int deviceId) noexcept;
 
     StatsIoTracker(IoType ioType, StatsBackend backend, const std::shared_ptr<IFile> &file,
                    const std::shared_ptr<IBuffer> &buffer, size_t size, hoff_t file_offset,
@@ -304,7 +404,18 @@ public:
         const auto     mem_addr{reinterpret_cast<intptr_t>(buffer->getBuffer()) + buffer_offset};
         m_aligned &= dio_mem_align && !(mem_addr & (dio_mem_align - 1));
     }
+    ~StatsIoTracker();
+
+    StatsIoTracker(const StatsIoTracker &)            = delete;
+    StatsIoTracker &operator=(const StatsIoTracker &) = delete;
+    StatsIoTracker(StatsIoTracker &&)                 = delete;
+    StatsIoTracker &operator=(StatsIoTracker &&)      = delete;
+
     void complete(uint64_t bytes) const noexcept;
+
+    // Microseconds since a process-local steady-clock epoch, masked to fit a
+    // BusyWindow timestamp.
+    static uint64_t nowUs() noexcept;
 
 private:
     IoType                                m_ioType;
@@ -312,6 +423,7 @@ private:
     std::chrono::steady_clock::time_point m_startTime;
     int                                   m_deviceId;
     bool                                  m_aligned;
+    bool                                  m_windowOpen;
 };
 
 class StatsCollection {
@@ -323,5 +435,12 @@ public:
     virtual void fileRegistration() const noexcept;
     virtual void bufferRegistration() const noexcept;
     virtual void fastpathRejection() const noexcept;
+
+    // Open an IO's busy-time windows at the three reported groupings. Returns true
+    // if the windows were opened (stats enabled), in which case endIo() must be
+    // called exactly once to close them. endIo() does not re-check the stats level,
+    // so a mid-flight level change cannot leave a window stuck open.
+    virtual bool beginIo(IoType ioType, StatsBackend backend, int deviceId, uint64_t nowUs) const noexcept;
+    virtual void endIo(IoType ioType, StatsBackend backend, int deviceId, uint64_t nowUs) const noexcept;
 };
 }

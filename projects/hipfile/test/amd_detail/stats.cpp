@@ -9,9 +9,13 @@
 #include "stats.h"
 #include "msys.h"
 
+#include <atomic>
+#include <chrono>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <sstream>
+#include <thread>
+#include <vector>
 
 using namespace hipFile;
 
@@ -281,6 +285,158 @@ TEST_F(HipFileStats, GenerateReportV1TwoGpus)
     std::string str{os.str()};
     ASSERT_GT(std::string::npos, str.find("Total Fastpath Read Size (B): 6"));
     ASSERT_GT(std::string::npos, str.find("Total Fastpath Read Errors: 3"));
+}
+
+namespace {
+uint64_t
+activeCount(const BusyWindow *window)
+{
+    return window->state.load() >> BusyWindow::TimestampBits;
+}
+}
+
+// Two IOs that overlap in time must count the union of their intervals, not the
+// sum of their durations. [0,100] and [50,150] overlap, so busy = 150, not 200.
+TEST_F(HipFileStats, BusyTimeOverlappingIos)
+{
+    Stats                    stats{};
+    StrictMock<MStatsServer> mstats{};
+    EXPECT_CALL(mstats, getStats).WillRepeatedly(testing::Return(&stats));
+    stats.setLevel(StatsLevel::Basic);
+
+    const auto *col{Context<StatsCollection>::get()};
+    ASSERT_TRUE(col->beginIo(IoType::Read, StatsBackend::Fastpath, 0, 0));
+    ASSERT_TRUE(col->beginIo(IoType::Read, StatsBackend::Fastpath, 0, 50));
+    col->endIo(IoType::Read, StatsBackend::Fastpath, 0, 100);
+    col->endIo(IoType::Read, StatsBackend::Fastpath, 0, 150);
+
+    // Every grouping that this IO belongs to sees the same union.
+    EXPECT_EQ(150u, stats.busyByType(IoType::Read)->busyUs.load());
+    EXPECT_EQ(150u, stats.busyByGpuType(0, IoType::Read)->busyUs.load());
+    EXPECT_EQ(150u, stats.busyByBackendType(StatsBackend::Fastpath, IoType::Read)->busyUs.load());
+    // The window is closed again.
+    EXPECT_EQ(0u, activeCount(stats.busyByType(IoType::Read)));
+}
+
+// A fully-nested interval adds nothing beyond the outer one: [0,100] over [25,75]
+// stays 100.
+TEST_F(HipFileStats, BusyTimeNestedIos)
+{
+    Stats                    stats{};
+    StrictMock<MStatsServer> mstats{};
+    EXPECT_CALL(mstats, getStats).WillRepeatedly(testing::Return(&stats));
+    stats.setLevel(StatsLevel::Basic);
+
+    const auto *col{Context<StatsCollection>::get()};
+    ASSERT_TRUE(col->beginIo(IoType::Write, StatsBackend::Fallback, 0, 0));
+    ASSERT_TRUE(col->beginIo(IoType::Write, StatsBackend::Fallback, 0, 25));
+    col->endIo(IoType::Write, StatsBackend::Fallback, 0, 75);
+    col->endIo(IoType::Write, StatsBackend::Fallback, 0, 100);
+
+    EXPECT_EQ(100u, stats.busyByType(IoType::Write)->busyUs.load());
+}
+
+// Disjoint intervals add their individual lengths and the idle gap between them is
+// excluded: [0,100] + [200,300] = 200.
+TEST_F(HipFileStats, BusyTimeDisjointIos)
+{
+    Stats                    stats{};
+    StrictMock<MStatsServer> mstats{};
+    EXPECT_CALL(mstats, getStats).WillRepeatedly(testing::Return(&stats));
+    stats.setLevel(StatsLevel::Basic);
+
+    const auto *col{Context<StatsCollection>::get()};
+    ASSERT_TRUE(col->beginIo(IoType::Read, StatsBackend::Fastpath, 0, 0));
+    col->endIo(IoType::Read, StatsBackend::Fastpath, 0, 100);
+    ASSERT_TRUE(col->beginIo(IoType::Read, StatsBackend::Fastpath, 0, 200));
+    col->endIo(IoType::Read, StatsBackend::Fastpath, 0, 300);
+
+    EXPECT_EQ(200u, stats.busyByType(IoType::Read)->busyUs.load());
+}
+
+// Busy time is attributed to the IO's own grouping and nowhere else.
+TEST_F(HipFileStats, BusyTimeGroupingIsolation)
+{
+    Stats                    stats{};
+    StrictMock<MStatsServer> mstats{};
+    EXPECT_CALL(mstats, getStats).WillRepeatedly(testing::Return(&stats));
+    stats.setLevel(StatsLevel::Basic);
+
+    const auto *col{Context<StatsCollection>::get()};
+    ASSERT_TRUE(col->beginIo(IoType::Read, StatsBackend::Fastpath, 3, 0));
+    col->endIo(IoType::Read, StatsBackend::Fastpath, 3, 100);
+
+    EXPECT_EQ(100u, stats.busyByGpuType(3, IoType::Read)->busyUs.load());
+    EXPECT_EQ(100u, stats.busyByBackendType(StatsBackend::Fastpath, IoType::Read)->busyUs.load());
+    // Not GPU 0, not Write, not Fallback.
+    EXPECT_EQ(0u, stats.busyByGpuType(0, IoType::Read)->busyUs.load());
+    EXPECT_EQ(0u, stats.busyByType(IoType::Write)->busyUs.load());
+    EXPECT_EQ(0u, stats.busyByBackendType(StatsBackend::Fallback, IoType::Read)->busyUs.load());
+}
+
+// With stats disabled, beginIo opens nothing and reports that it did not, so the
+// tracker knows to skip the matching endIo.
+TEST_F(HipFileStats, BusyTimeDisabledLevelDoesNothing)
+{
+    Stats                    stats{};
+    StrictMock<MStatsServer> mstats{};
+    EXPECT_CALL(mstats, getStats).WillRepeatedly(testing::Return(&stats));
+    stats.setLevel(StatsLevel::Disabled);
+
+    const auto *col{Context<StatsCollection>::get()};
+    EXPECT_FALSE(col->beginIo(IoType::Read, StatsBackend::Fastpath, 0, 0));
+    EXPECT_EQ(0u, stats.busyByType(IoType::Read)->busyUs.load());
+    EXPECT_EQ(0u, activeCount(stats.busyByType(IoType::Read)));
+}
+
+// The lock-free transition path must be race-free and leave the window balanced
+// (active count back to zero) under concurrency. Runs under the sanitizers.
+TEST_F(HipFileStats, BusyTimeConcurrentBalanced)
+{
+    Stats                    stats{};
+    StrictMock<MStatsServer> mstats{};
+    EXPECT_CALL(mstats, getStats).WillRepeatedly(testing::Return(&stats));
+    stats.setLevel(StatsLevel::Basic);
+
+    const auto              *col{Context<StatsCollection>::get()};
+    constexpr int            kThreads{8};
+    constexpr int            kIters{2000};
+    std::vector<std::thread> threads{};
+    for (int t{}; t < kThreads; ++t) {
+        threads.emplace_back([col] {
+            for (int i{}; i < kIters; ++i) {
+                uint64_t start{StatsIoTracker::nowUs()};
+                col->beginIo(IoType::Read, StatsBackend::Fastpath, 0, start);
+                col->endIo(IoType::Read, StatsBackend::Fastpath, 0, StatsIoTracker::nowUs());
+            }
+        });
+    }
+    for (auto &thread : threads) {
+        thread.join();
+    }
+
+    EXPECT_EQ(0u, activeCount(stats.busyByType(IoType::Read)));
+    EXPECT_EQ(0u, activeCount(stats.busyByGpuType(0, IoType::Read)));
+    EXPECT_EQ(0u, activeCount(stats.busyByBackendType(StatsBackend::Fastpath, IoType::Read)));
+}
+
+// The aggregate bandwidth line divides total bytes by the backend+ioType busy
+// time, not the summed per-IO latency.
+TEST_F(HipFileStats, GenerateReportBandwidthUsesBusyTime)
+{
+    Stats              stats{};
+    std::ostringstream os{};
+    // 1 GiB over 1 s of busy time -> 1 GiB/s. A large summed latency would give a
+    // very different number if it were (wrongly) used as the denominator.
+    stats.getPerGpuStats(0, StatsBackend::Fastpath)
+        ->ioSizeBytes[static_cast<size_t>(IoType::Read)]
+        .buckets[0] = 1024ull * 1024 * 1024;
+    stats.getPerGpuStats(0, StatsBackend::Fastpath)->ioTimeUs[static_cast<size_t>(IoType::Read)].buckets[0] =
+        500000;
+    stats.busyByBackendType(StatsBackend::Fastpath, IoType::Read)->busyUs = 1000000;
+
+    StatsClient::generateReportV1(os, &stats);
+    EXPECT_NE(std::string::npos, os.str().find("Average Fastpath Read Bandwidth (GiB/s): 1\n"));
 }
 
 struct HipFileStatsHistogram : public HipFileUnopened {};
