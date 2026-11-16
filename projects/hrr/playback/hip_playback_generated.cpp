@@ -5514,25 +5514,17 @@ static hipError_t playback_hipExtMemcpyBatchAsync(PlaybackContext& ctx, const ui
 }
 
 static hipError_t playback_hipMemcpyWithAttributesAsync(PlaybackContext& ctx, const uint8_t* payload) {
-  const auto* a = reinterpret_cast<const hrr_args_hipMemcpyWithAttributesAsync*>(payload);
-  hipMemcpyAttributes _out_attr{};
-  hipError_t _r = (hipError_t)hipMemcpyWithAttributesAsync(ctx.translate_ptr(a->dst), ctx.translate_ptr(a->src), (size_t)a->size, &_out_attr, (hipStream_t)ctx.translate_stream(a->stream));
-  if (_r != hipSuccess && a->ret != 0 && static_cast<int32_t>(_r) == a->ret) {
-    hrr_note_recorded_error(ctx, "hipMemcpyWithAttributesAsync", a->ret);
-    return hipSuccess;
-  }
-  return _r;
+  (void)payload;
+  hrr_note_unreplayable(ctx, "hipMemcpyWithAttributesAsync",
+                        "capture records the hipMemcpyAttributes pointer but not its contents, so there is no recorded copy to repeat");
+  return hipErrorNotSupported;
 }
 
 static hipError_t playback_hipMemcpy3DWithAttributesAsync(PlaybackContext& ctx, const uint8_t* payload) {
-  const auto* a = reinterpret_cast<const hrr_args_hipMemcpy3DWithAttributesAsync*>(payload);
-  struct hipMemcpy3DBatchOp _out_op{};
-  hipError_t _r = (hipError_t)hipMemcpy3DWithAttributesAsync(&_out_op, (unsigned long long)a->flags, (hipStream_t)ctx.translate_stream(a->stream));
-  if (_r != hipSuccess && a->ret != 0 && static_cast<int32_t>(_r) == a->ret) {
-    hrr_note_recorded_error(ctx, "hipMemcpy3DWithAttributesAsync", a->ret);
-    return hipSuccess;
-  }
-  return _r;
+  (void)payload;
+  hrr_note_unreplayable(ctx, "hipMemcpy3DWithAttributesAsync",
+                        "capture records the hipMemcpy3DBatchOp pointer but not its contents, so the recorded source, destination and extent are not available");
+  return hipErrorNotSupported;
 }
 
 static hipError_t playback_hipArrayGetPlane(PlaybackContext& ctx, const uint8_t* payload) {

@@ -8020,6 +8020,8 @@ static hipError_t capture_hipMemcpyWithAttributesAsync(void* dst, const void* sr
     a.size = static_cast<decltype(a.size)>(size);
     a.attr = reinterpret_cast<uint64_t>(attr);
     a.stream = reinterpret_cast<uint64_t>(stream);
+    hrr_cap::writer::note_unreplayable("hipMemcpyWithAttributesAsync",
+        "capture records the hipMemcpyAttributes pointer but not its contents, so there is no recorded copy to repeat");
     hrr_cap::writer::write_event_raw(HRR_API_HIPMEMCPYWITHATTRIBUTESASYNC, &a.hdr, sizeof(a));
   }
   return r;
@@ -8034,6 +8036,8 @@ static hipError_t capture_hipMemcpy3DWithAttributesAsync(struct hipMemcpy3DBatch
     a.op = reinterpret_cast<uint64_t>(op);
     a.flags = static_cast<decltype(a.flags)>(flags);
     a.stream = reinterpret_cast<uint64_t>(stream);
+    hrr_cap::writer::note_unreplayable("hipMemcpy3DWithAttributesAsync",
+        "capture records the hipMemcpy3DBatchOp pointer but not its contents, so the recorded source, destination and extent are not available");
     hrr_cap::writer::write_event_raw(HRR_API_HIPMEMCPY3DWITHATTRIBUTESASYNC, &a.hdr, sizeof(a));
   }
   return r;

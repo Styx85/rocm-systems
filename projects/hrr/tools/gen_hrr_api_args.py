@@ -498,6 +498,13 @@ _SHAREABLE_IMPORT_REASON = (
 )
 
 UNREPLAYABLE_PLAYBACK_APIS: Dict[str, str] = {
+    # The copy is described by a non-const struct pointer that the generator treats as
+    # an output parameter: capture records the pointer value, not the struct contents,
+    # so replay would call the real API with a default-constructed descriptor.
+    "hipMemcpyWithAttributesAsync":
+        "capture records the hipMemcpyAttributes pointer but not its contents, so there is no recorded copy to repeat",
+    "hipMemcpy3DWithAttributesAsync":
+        "capture records the hipMemcpy3DBatchOp pointer but not its contents, so the recorded source, destination and extent are not available",
     "hipLaunchHostFunc":        _HOST_CALLBACK_REASON,
     "hipLaunchHostFunc_spt":    _HOST_CALLBACK_REASON,
     "hipStreamAddCallback":     _HOST_CALLBACK_REASON,
