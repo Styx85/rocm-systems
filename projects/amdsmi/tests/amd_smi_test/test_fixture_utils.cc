@@ -9,15 +9,18 @@
 #include <unistd.h>
 
 #include <cerrno>
+#include <chrono>
 #include <cstdlib>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <memory>
 #include <system_error>
+#include <thread>
 
 #include "amd_smi/impl/amd_smi_processor.h"
 #include "amd_smi/impl/amd_smi_system.h"
+#include "amd_smi/impl/amd_smi_utils.h"
 #include "rocm_smi/rocm_smi_device.h"
 #include "rocm_smi/rocm_smi_main.h"
 
@@ -160,6 +163,11 @@ ScopedRocmSmiDevice::ScopedRocmSmiDevice(const std::string& path) {
 ScopedRocmSmiDevice::~ScopedRocmSmiDevice() {
   auto& devices = amd::smi::RocmSMI::getInstance().devices();
   if (index_ < devices.size()) devices.resize(index_);
+}
+
+void WaitOutProcessListCache() {
+  const int ms = read_env_ms("AMDSMI_PROCESS_INFO_CACHE_MS", 1);  // As the library reads it
+  std::this_thread::sleep_for(std::chrono::milliseconds(ms + 1));
 }
 
 ScopedAmdsmiInit::ScopedAmdsmiInit() {
